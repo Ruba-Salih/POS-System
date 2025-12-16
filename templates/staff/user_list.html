@@ -1,0 +1,12 @@
+<h2>إدارة المستخدمين</h2>
+<a href="{% url 'create_user' %}">➕ إضافة مستخدم جديد</a>
+<table>
+  <tr><th>اسم المستخدم</th><th>الدور</th><th>البريد</th></tr>
+  {% for user in users %}
+    <tr>
+      <td>{{ user.username }}</td>
+      <td>{{ user.get_role_display }}</td>
+      <td>{{ user.email }}</td>
+    </tr>
+  {% endfor %}
+</table>
