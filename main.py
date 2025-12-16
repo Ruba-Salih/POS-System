@@ -1,11 +1,9 @@
-import sys
 from PyQt5.QtWidgets import QApplication
-from login_window import LoginWindow
-from database import init_db
+import sys
+from manager_ui.main_window import ManagerWindow
 
 if __name__ == "__main__":
-    init_db()
     app = QApplication(sys.argv)
-    window = LoginWindow()
+    window = ManagerWindow()
     window.show()
     sys.exit(app.exec_())
