@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}لوحة الكاشير{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">مرحباً {{ user.full_name }} 👋</h2>
+
+<div class="list-group">
+    <a href="{% url 'inventory:product_list' %}"
+       class="list-group-item list-group-item-action">
+       🧾 المنتجات / البيع
+    </a>
+
+    <a href="{% url 'change_password' %}"
+       class="list-group-item list-group-item-action">
+       🔐 تغيير كلمة المرور
+    </a>
+</div>
+{% endblock %}

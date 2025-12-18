@@ -24,11 +24,11 @@ def user_login(request):
             login(request, user)
             # Redirect based on role
             if user.role == 'manager':
-                return redirect('manager_dashboard')  # ← Change as needed
+                return redirect('manager_dashboard')
             elif user.role == 'cashier':
-                return redirect('pos_home')  # ← Change as needed
+                return redirect('cashier_dashboard')
             else:
-                return redirect('staff_home')  # ← optional
+                return redirect('staff_dashboard')
         else:
             messages.error(request, 'اسم المستخدم أو كلمة المرور غير صحيحة')
 
@@ -45,11 +45,11 @@ def manager_dashboard(request):
 
 @login_required
 def cashier_dashboard(request):
-    return HttpResponse("مرحبا بك في لوحة تحكم الكاشير")
+    return render(request, 'staff/cashier_dashboard.html')
 
 @login_required
 def staff_home(request):
-    return HttpResponse("مرحبا بك في صفحة الموظف")
+    return render(request, 'staff/cashier_dashboard.html')
 
 @login_required
 def staff_list(request):
@@ -111,5 +111,14 @@ def change_password(request):
     if form.is_valid():
         user = form.save()
         update_session_auth_hash(request, user)
-        return redirect('manager_dashboard')
+        messages.success(request, 'تم تغيير كلمة المرور بنجاح')
+
+        # redirect back to correct dashboard
+        if user.role == 'manager':
+            return redirect('manager_dashboard')
+        elif user.role == 'cashier':
+            return redirect('cashier_dashboard')
+        else:
+            return redirect('staff_dashboard')
+
     return render(request, 'staff/change_password.html', {'form': form})
