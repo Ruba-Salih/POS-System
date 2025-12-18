@@ -1,0 +1,15 @@
+body {
+    direction: rtl;
+    font-family: "Cairo", sans-serif;
+    background-color: #f8f9fa;
+    padding: 20px;
+}
+
+.navbar {
+    background-color: #343a40;
+}
+
+.navbar a {
+    color: white !important;
+    margin: 0 10px;
+}

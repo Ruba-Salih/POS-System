@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>هل أنت متأكد من حذف {{ user.username }}؟</h3>
+
+<form method="POST">
+    {% csrf_token %}
+    <button class="btn btn-primary">نعم، احذف</button>
+    <a href="{% url 'staff_list' %}">إلغاء</a>
+</form>
+
+{% endblock %}

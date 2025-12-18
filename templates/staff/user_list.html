@@ -1,12 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
 <h2>إدارة المستخدمين</h2>
-<a href="{% url 'create_user' %}">➕ إضافة مستخدم جديد</a>
-<table>
-  <tr><th>اسم المستخدم</th><th>الدور</th><th>البريد</th></tr>
-  {% for user in users %}
-    <tr>
-      <td>{{ user.username }}</td>
-      <td>{{ user.get_role_display }}</td>
-      <td>{{ user.email }}</td>
-    </tr>
-  {% endfor %}
+
+<a href="{% url 'create_user' %}" class="btn btn-success mb-3">➕ إضافة مستخدم</a>
+
+<table class="table table-bordered">
+<tr>
+    <th>اسم المستخدم</th>
+    <th>الاسم</th>
+    <th>الهاتف</th>
+    <th>السكن</th>
+    <th>الدور</th>
+    <th>إجراءات</th>
+</tr>
+{% for user in users %}
+<tr>
+    <td>{{ user.username }}</td>
+    <td>{{ user.full_name }}</td>
+    <td>{{ user.phone_number }}</td>
+    <td>{{ user.location }}</td>
+    <td>{{ user.get_role_display }}</td>
+    <td>
+        <a href="{% url 'update_user' user.id %}" class="btn btn-sm btn-warning">✏️تعديل</a>
+        <form method="POST"
+                  action="{% url 'delete_user' user.id %}"
+                  style="display:inline;"
+                  onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-danger">🗑️حذف</button>
+            </form>
+    </td>
+</tr>
+{% endfor %}
 </table>
+{% endblock %}

@@ -1,0 +1,15 @@
+<!-- templates/staff/manager_dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}لوحة تحكم المدير{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">مرحباً {{ user.username }} 👋</h2>
+
+<div class="list-group">
+    <a href="{% url 'staff_list' %}" class="list-group-item list-group-item-action">👥 إدارة المستخدمين</a>
+    <a href="#" class="list-group-item list-group-item-action">📊 التقارير</a>
+    <a href="#" class="list-group-item list-group-item-action">💵 المبيعات</a>
+    <a href="{% url 'change_password' %}" class="list-group-item">🔐 تغيير كلمة المرور</a>
+</div>
+{% endblock %}

@@ -1,41 +1,115 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib import messages
+from django.http import HttpResponse
 from .forms import CustomUserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
+from .forms import (
+    CustomUserCreationForm,
+    CustomUserUpdateForm,
+    CustomPasswordChangeForm
+)
+
+
+User = get_user_model()
 
 def user_login(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
+
         if user is not None:
             login(request, user)
+            # Redirect based on role
             if user.role == 'manager':
-                return redirect('manager_dashboard')  # You’ll create this later
+                return redirect('manager_dashboard')  # ← Change as needed
             elif user.role == 'cashier':
-                return redirect('cashier_dashboard')  # You’ll create this later
+                return redirect('pos_home')  # ← Change as needed
             else:
-                return redirect('home')
+                return redirect('staff_home')  # ← optional
         else:
             messages.error(request, 'اسم المستخدم أو كلمة المرور غير صحيحة')
+
     return render(request, 'staff/login.html')
 
-User = get_user_model()
+@login_required
+def user_logout(request):
+    logout(request)
+    return redirect('/staff/login/')
+
+@login_required
+def manager_dashboard(request):
+    return render(request, 'staff/manager_dashboard.html')
+
+@login_required
+def cashier_dashboard(request):
+    return HttpResponse("مرحبا بك في لوحة تحكم الكاشير")
+
+@login_required
+def staff_home(request):
+    return HttpResponse("مرحبا بك في صفحة الموظف")
 
 @login_required
 def staff_list(request):
-    users = User.objects.all()
+    users = User.objects.exclude(id=request.user.id)
     return render(request, 'staff/user_list.html', {'users': users})
 
+# إضافة مستخدم
 @login_required
 def create_user(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, 'تم إضافة المستخدم بنجاح')
             return redirect('staff_list')
     else:
         form = CustomUserCreationForm()
-    return render(request, 'staff/user_form.html', {'form': form})
+
+    return render(request, 'staff/user_form.html', {
+        'form': form,
+        'title': 'إضافة مستخدم'
+    })
+
+# تعديل مستخدم
+@login_required
+def update_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+
+    if request.method == 'POST':
+        form = CustomUserUpdateForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'تم تحديث المستخدم')
+            return redirect('staff_list')
+    else:
+        form = CustomUserUpdateForm(instance=user)
+
+    return render(request, 'staff/user_form.html', {
+        'form': form,
+        'title': 'تعديل مستخدم'
+    })
+
+# حذف مستخدم
+@login_required
+def delete_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+
+    if request.method == 'POST':
+        user.delete()
+        messages.success(request, 'تم حذف المستخدم')
+        return redirect('staff_list')
+
+    return render(request, 'staff/user_delete.html', {'user': user})
+
+# تغيير كلمة المرور
+@login_required
+def change_password(request):
+    form = CustomPasswordChangeForm(request.user, request.POST or None)
+    if form.is_valid():
+        user = form.save()
+        update_session_auth_hash(request, user)
+        return redirect('manager_dashboard')
+    return render(request, 'staff/change_password.html', {'form': form})
