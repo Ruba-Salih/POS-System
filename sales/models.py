@@ -1,17 +1,64 @@
-# sales/models.py
 from django.db import models
 from django.conf import settings
 from inventory.models import Product
 
-class Sale(models.Model):
+
+class Ticket(models.Model):
+    PAYMENT_CHOICES = (
+        ('cash', 'نقداً'),
+        ('transfer', 'تحويل'),
+    )
+
+    STATUS_CHOICES = (
+        ('open', 'مفتوح'),
+        ('closed', 'مغلق'),
+    )
+
+    cashier = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name="الكاشير"
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='open'
+    )
+    payment_method = models.CharField(
+        max_length=10,
+        choices=PAYMENT_CHOICES,
+        null=True,
+        blank=True
+    )
+    transfer_number = models.CharField(
+        max_length=50,
+        null=True,
+        blank=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def total_amount(self):
+        return sum(item.subtotal() for item in self.items.all())
+
+    def __str__(self):
+        return f"طلب #{self.id}"
+
+
+class TicketItem(models.Model):
+    ticket = models.ForeignKey(
+        Ticket,
+        related_name='items',
+        on_delete=models.CASCADE
+    )
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    total = models.DecimalField(max_digits=10, decimal_places=2)
-    cashier = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-        self.price = self.product.price
-        self.total = self.price * self.quantity
+        # freeze price at time of sale
+        if not self.pk:
+            self.price = self.product.price
         super().save(*args, **kwargs)
+
+    def subtotal(self):
+        return self.price * self.quantity

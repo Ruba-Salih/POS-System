@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, PasswordChangeForm
 from .models import CustomUser
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
 
 
 User = get_user_model()
@@ -98,3 +99,21 @@ class CustomUserUpdateForm(forms.ModelForm):
 
 class CustomPasswordChangeForm(PasswordChangeForm):
     pass
+
+class ManagerPinForm(forms.ModelForm):
+    manager_pin = forms.CharField(
+        label="رمز المدير",
+        widget=forms.PasswordInput,
+        required=True
+    )
+
+    class Meta:
+        model = User
+        fields = ['manager_pin']
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.manager_pin = make_password(self.cleaned_data['manager_pin'])
+        if commit:
+            user.save()
+        return user

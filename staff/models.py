@@ -11,6 +11,12 @@ class CustomUser(AbstractUser):
     full_name = models.CharField(max_length=150)
     phone_number = models.CharField(max_length=20, blank=True)
     location = models.CharField(max_length=255, blank=True)
+    manager_pin = models.CharField(
+        max_length=128,
+        blank=True,
+        null=True,
+        verbose_name="رمز المدير"
+    )
 
     def __str__(self):
         return f"{self.username} - {self.get_role_display()}"

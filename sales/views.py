@@ -1,16 +1,152 @@
-# sales/views.py
-from django.shortcuts import render, redirect
-from .forms import SaleForm
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import JsonResponse
+from .models import Ticket, TicketItem
+from .forms import TicketItemForm
+from django.contrib.auth.hashers import check_password
+from inventory.models import Product
+from django.contrib.auth import get_user_model
 
-def add_sale(request):
+User = get_user_model()
+
+
+@login_required
+def create_ticket(request):
+    ticket = Ticket.objects.create(cashier=request.user)
+    return redirect('sales:ticket_detail', ticket.id)
+
+@login_required
+def ticket_detail(request, ticket_id):
+    ticket = get_object_or_404(
+        Ticket,
+        id=ticket_id,
+        cashier=request.user
+    )
+
+    if ticket.status == 'closed':
+        messages.error(request, 'لا يمكن تعديل طلب مغلق')
+        return redirect('sales:pos')
+
+    form = TicketItemForm(request.POST or None)
+
+    if request.method == 'POST' and form.is_valid():
+        item = form.save(commit=False)
+        item.ticket = ticket
+        item.price = item.product.price
+        item.save()
+        return redirect('sales:ticket_detail', ticket.id)
+
+    return render(request, 'sales/ticket_detail.html', {
+        'ticket': ticket,
+        'form': form
+    })
+
+
+@login_required
+def close_ticket(request, ticket_id):
+    ticket = get_object_or_404(
+        Ticket,
+        id=ticket_id,
+        cashier=request.user,
+        status='open'
+    )
+
+    payment_method = request.POST.get('payment_method')
+    transfer_number = request.POST.get('transfer_number')
+
+    if payment_method == 'transfer' and not transfer_number:
+        return JsonResponse({'error': 'transfer_required'}, status=400)
+
+    ticket.payment_method = payment_method
+    ticket.transfer_number = transfer_number
+    ticket.status = 'closed'
+    ticket.save()
+
+    return JsonResponse({
+        'success': True,
+        'ticket_id': ticket.id
+    })
+
+
+@login_required
+def pos_view(request):
+    # get or create open ticket
+    ticket, created = Ticket.objects.get_or_create(
+        cashier=request.user,
+        status='open'
+    )
+
+    products = Product.objects.filter(is_active=True)
+    form = TicketItemForm(request.POST or None)
+
+    if request.method == 'POST' and form.is_valid():
+        item = form.save(commit=False)
+        item.ticket = ticket
+        item.price = item.product.price
+        item.save()
+        return redirect('sales:pos')
+
+    return render(request, 'sales/pos.html', {
+        'ticket': ticket,
+        'products': products,
+        'form': form
+    })
+
+@login_required
+def delete_ticket_item(request, item_id):
+    item = get_object_or_404(TicketItem, id=item_id)
+    ticket = item.ticket
+
+    # ❌ block closed tickets
+    if ticket.status == 'closed':
+        messages.error(request, 'لا يمكن تعديل طلب مغلق')
+        return redirect('sales:pos')
+
     if request.method == 'POST':
-        form = SaleForm(request.POST)
-        if form.is_valid():
-            sale = form.save(commit=False)
-            sale.cashier = request.user
-            sale.save()
-            return redirect('add_sale')
-    else:
-        form = SaleForm()
+        manager_pin = request.POST.get('manager_pin')
 
-    return render(request, 'sales/add_sale.html', {'form': form})
+        manager = User.objects.filter(
+            role='manager',
+            manager_pin__isnull=False
+        ).first()
+
+        if not manager or not check_password(manager_pin, manager.manager_pin):
+            messages.error(request, 'رمز المدير غير صحيح')
+            return redirect('sales:pos')
+
+        item.delete()
+        messages.success(request, 'تم حذف المنتج بإذن المدير')
+        return redirect('sales:pos')
+
+
+@login_required
+def update_ticket_item(request, item_id):
+    item = get_object_or_404(TicketItem, id=item_id)
+    ticket = item.ticket
+
+    if ticket.status == 'closed':
+        return JsonResponse({'error': 'ticket_closed'}, status=400)
+
+    quantity = request.POST.get('quantity')
+
+    try:
+        quantity = int(quantity)
+        if quantity < 1:
+            raise ValueError
+    except ValueError:
+        return JsonResponse({'error': 'invalid_quantity'}, status=400)
+
+    item.quantity = quantity
+    item.save()
+
+    return JsonResponse({
+        'item_subtotal': float(item.subtotal()),
+        'ticket_total': float(ticket.total_amount())
+    })
+
+@login_required
+def print_ticket(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    return render(request, 'sales/receipt.html', {'ticket': ticket})
+

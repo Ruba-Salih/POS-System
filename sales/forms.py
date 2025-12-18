@@ -1,8 +1,7 @@
-# sales/forms.py
 from django import forms
-from .models import Sale
+from .models import TicketItem
 
-class SaleForm(forms.ModelForm):
+class TicketItemForm(forms.ModelForm):
     class Meta:
-        model = Sale
+        model = TicketItem
         fields = ['product', 'quantity']

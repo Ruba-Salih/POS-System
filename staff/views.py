@@ -8,8 +8,11 @@ from django.contrib.auth import get_user_model
 from .forms import (
     CustomUserCreationForm,
     CustomUserUpdateForm,
-    CustomPasswordChangeForm
+    CustomPasswordChangeForm,
+    ManagerPinForm
 )
+from pos_system.utils import is_manager
+from sales.models import Ticket
 
 
 User = get_user_model()
@@ -45,6 +48,15 @@ def manager_dashboard(request):
 
 @login_required
 def cashier_dashboard(request):
+    ticket = Ticket.objects.filter(
+        cashier=request.user,
+        status='open'
+    ).first()
+
+    # if exists → go to it
+    if ticket:
+        return redirect('sales:ticket_detail', ticket.id)
+
     return render(request, 'staff/cashier_dashboard.html')
 
 @login_required
@@ -122,3 +134,17 @@ def change_password(request):
             return redirect('staff_dashboard')
 
     return render(request, 'staff/change_password.html', {'form': form})
+
+@login_required
+def set_manager_pin(request):
+    if not is_manager(request.user):
+        return redirect('cashier_dashboard')
+
+    form = ManagerPinForm(request.POST or None, instance=request.user)
+
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'تم حفظ رمز المدير')
+        return redirect('manager_dashboard')
+
+    return render(request, 'staff/set_manager_pin.html', {'form': form})

@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pos.css' %}">
+{% endblock %}
+
+{% block content %}
+
+
+<h3>🧾 طلب رقم {{ ticket.id }}</h3>
+<p>👤 الكاشير: {{ ticket.cashier.full_name }}</p>
+
+<hr>
+
+<h4 class="mb-3">🛒 المنتجات</h4>
+
+<div class="products-slider">
+{% for product in products %}
+    <form class="product-form" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="product" value="{{ product.id }}">
+        <input type="hidden" name="quantity" value="1">
+
+        <button type="submit" class="product-card">
+            <div class="product-image">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}">
+                {% else %}
+                    <div class="no-image">📦</div>
+                {% endif %}
+            </div>
+
+            <div class="product-name">{{ product.name }}</div>
+            <div class="product-price">{{ product.price }}</div>
+        </button>
+    </form>
+{% endfor %}
+</div>
+
+<!-- CURRENT ORDER -->
+<table class="table table-bordered align-middle">
+<tr>
+    <th>المنتج</th>
+    <th>الكمية</th>
+    <th>السعر</th>
+    <th>الإجمالي</th>
+    <th>حذف</th>
+</tr>
+
+{% for item in ticket.items.all %}
+<tr>
+    <td>{{ item.product.name }}</td>
+
+    <!-- EDIT QUANTITY (NO PIN REQUIRED) -->
+    <td>
+    <input type="number"
+           value="{{ item.quantity }}"
+           min="1"
+           class="form-control form-control-sm qty-input"
+           data-item-id="{{ item.id }}"
+           style="width:70px;">
+</td>
+
+    <td>{{ item.price }}</td>
+    <td id="item-subtotal-{{ item.id }}">
+    {{ item.subtotal }}
+</td>
+
+
+    <!-- DELETE (MANAGER PIN REQUIRED) -->
+    <td>
+        <form method="POST"
+              action="{% url 'sales:delete_ticket_item' item.id %}"
+              onsubmit="return askPin(this);">
+            {% csrf_token %}
+            <input type="hidden" name="manager_pin">
+            <button class="btn btn-danger btn-sm">🗑️حذف</button>
+        </form>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="5" class="text-center">لا توجد عناصر</td>
+</tr>
+{% endfor %}
+</table>
+
+<h4 class="text-end">
+    💰 الإجمالي: <span id="ticket-total">{{ ticket.total_amount }}</span>
+</h4>
+
+<hr>
+
+<!-- PAYMENT -->
+<form id="payment-form">
+    {% csrf_token %}
+    <select name="payment_method" required>
+        <option value="cash">نقداً</option>
+        <option value="transfer">تحويل</option>
+    </select>
+
+    <input type="text" name="transfer_number">
+
+    <button class="btn btn-primary w-100 mt-2">
+        ✔ إغلاق الطلب
+    </button>
+</form>
+
+<script>
+document.getElementById('payment-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    fetch("{% url 'sales:close_ticket' ticket.id %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: new FormData(this)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            printTicket(data.ticket_id);
+            window.location.href = "{% url 'sales:pos' %}";
+        }
+    });
+});
+</script>
+
+
+<script>
+function askPin(form) {
+    const pin = prompt("أدخل رمز المدير:");
+    if (!pin) return false;
+    form.querySelector('input[name="manager_pin"]').value = pin;
+    return true;
+}
+</script>
+
+<script>
+document.querySelectorAll('.qty-input').forEach(input => {
+    input.addEventListener('change', function () {
+        const itemId = this.dataset.itemId;
+        const quantity = this.value;
+
+        fetch(`/sales/item/update/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `quantity=${quantity}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) return;
+
+            document.getElementById(`item-subtotal-${itemId}`)
+                .innerText = data.item_subtotal.toFixed(2);
+
+            document.getElementById('ticket-total')
+                .innerText = data.ticket_total.toFixed(2);
+        });
+    });
+});
+</script>
+
+<script>
+function printTicket(ticketId) {
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = `/sales/ticket/${ticketId}/print/`;
+    document.body.appendChild(iframe);
+
+    setTimeout(() => {
+        document.body.removeChild(iframe);
+    }, 3000);
+}
+</script>
+
+
+{% endblock %}

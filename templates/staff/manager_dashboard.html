@@ -21,26 +21,35 @@
     </a>
 
     <!-- Sales -->
-    
-     <a href=""
+    <a href="#"
        class="list-group-item list-group-item-action">
        💵 المبيعات
     </a>
 
     <!-- Expenses -->
-    
-     <a href=""
+    <a href="#"
        class="list-group-item list-group-item-action">
        💸 المصروفات
     </a>
 
     <!-- Reports -->
-    <a href=""
+    <a href="#"
        class="list-group-item list-group-item-action">
        📊 التقارير
     </a>
 
-    <!-- Security -->
+    <!-- 🔐 Manager PIN -->
+    <a href="{% url 'set_manager_pin' %}"
+       class="list-group-item list-group-item-action">
+       🔑 تعيين / تغيير رمز المدير
+       {% if user.manager_pin %}
+           <span class="badge bg-success float-end">مُعيَّن</span>
+       {% else %}
+           <span class="badge bg-danger float-end">غير مُعيَّن</span>
+       {% endif %}
+    </a>
+
+    <!-- Change Password -->
     <a href="{% url 'change_password' %}"
        class="list-group-item list-group-item-action">
        🔐 تغيير كلمة المرور
