@@ -1,47 +1,53 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}لوحة الكاشير{% endblock %}
 
 {% block content %}
 
-<h2 class="mb-4">👤 مرحباً {{ user.full_name }}</h2>
+<link rel="stylesheet" href="{% static 'css/cashier-dashboard.css' %}">
 
-<!-- OPEN TICKETS -->
-<h4 class="mb-3">🧾 الطلبات المفتوحة</h4>
+<div class="cashier-dashboard">
 
-<div class="list-group mb-4">
+    <h2 class="dashboard-title">
+        👤 مرحباً {{ user.full_name }}
+    </h2>
 
-    {% for ticket in open_tickets %}
-        <a href="{% url 'sales:pos' ticket.id %}"
-           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-            🧾 طلب رقم {{ ticket.id }}
+    <!-- OPEN TICKETS -->
+    <h4 class="section-title">🧾 الطلبات المفتوحة</h4>
 
-            <span class="badge bg-secondary">
-                {{ ticket.items.count }} عنصر
-            </span>
+    <div class="ticket-list">
+
+        {% for ticket in open_tickets %}
+            <a href="{% url 'sales:pos' ticket.id %}" class="ticket-item">
+                <span class="ticket-label">
+                    🧾 طلب رقم {{ ticket.id }}
+                </span>
+
+                <span class="ticket-badge">
+                    {{ ticket.items.count }} عنصر
+                </span>
+            </a>
+        {% empty %}
+            <div class="ticket-empty">
+                لا توجد طلبات مفتوحة
+            </div>
+        {% endfor %}
+
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="action-list">
+
+        <a href="{% url 'sales:create_ticket' %}" class="action-item action-success">
+            ➕ إنشاء طلب جديد
         </a>
-    {% empty %}
-        <div class="list-group-item text-muted text-center">
-            لا توجد طلبات مفتوحة
-        </div>
-    {% endfor %}
 
-</div>
+        <a href="{% url 'change_password' %}" class="action-item">
+            🔐 تغيير كلمة المرور
+        </a>
 
-<!-- ACTIONS -->
-<div class="list-group">
-
-    <!-- CREATE NEW ORDER -->
-    <a href="{% url 'sales:create_ticket' %}"
-       class="list-group-item list-group-item-action list-group-item-success">
-        ➕ إنشاء طلب جديد
-    </a>
-
-    <!-- CHANGE PASSWORD -->
-    <a href="{% url 'change_password' %}"
-       class="list-group-item list-group-item-action">
-        🔐 تغيير كلمة المرور
-    </a>
+    </div>
 
 </div>
 
