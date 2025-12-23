@@ -7,17 +7,29 @@
 
 {% block content %}
 
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h3>🧾 طلب رقم {{ ticket.id }}</h3>
 
-<h3>🧾 طلب رقم {{ ticket.id }}</h3>
+    <!-- ✅ NEW ORDER IN NEW TAB -->
+    <a href="{% url 'sales:create_ticket' %}"
+       target="_blank"
+       rel="noopener"
+       class="btn btn-success">
+        ➕ طلب جديد
+    </a>
+</div>
+
 <p>👤 الكاشير: {{ ticket.cashier.full_name }}</p>
 
 <hr>
 
+<!-- PRODUCTS -->
 <h4 class="mb-3">🛒 المنتجات</h4>
 
 <div class="products-slider">
 {% for product in products %}
-    <form class="product-form" method="POST">
+    <form method="POST" class="product-form">
         {% csrf_token %}
         <input type="hidden" name="product" value="{{ product.id }}">
         <input type="hidden" name="quantity" value="1">
@@ -25,7 +37,7 @@
         <button type="submit" class="product-card">
             <div class="product-image">
                 {% if product.image %}
-                    <img src="{{ product.image.url }}">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
                 {% else %}
                     <div class="no-image">📦</div>
                 {% endif %}
@@ -38,8 +50,11 @@
 {% endfor %}
 </div>
 
+<hr>
+
 <!-- CURRENT ORDER -->
 <table class="table table-bordered align-middle">
+<thead>
 <tr>
     <th>المنتج</th>
     <th>الكمية</th>
@@ -47,35 +62,35 @@
     <th>الإجمالي</th>
     <th>حذف</th>
 </tr>
+</thead>
 
+<tbody>
 {% for item in ticket.items.all %}
 <tr>
     <td>{{ item.product.name }}</td>
 
-    <!-- EDIT QUANTITY (NO PIN REQUIRED) -->
     <td>
-    <input type="number"
-           value="{{ item.quantity }}"
-           min="1"
-           class="form-control form-control-sm qty-input"
-           data-item-id="{{ item.id }}"
-           style="width:70px;">
-</td>
+        <input type="number"
+               value="{{ item.quantity }}"
+               min="1"
+               class="form-control form-control-sm qty-input"
+               data-item-id="{{ item.id }}"
+               style="width:70px;">
+    </td>
 
     <td>{{ item.price }}</td>
+
     <td id="item-subtotal-{{ item.id }}">
-    {{ item.subtotal }}
-</td>
+        {{ item.subtotal }}
+    </td>
 
-
-    <!-- DELETE (MANAGER PIN REQUIRED) -->
     <td>
         <form method="POST"
               action="{% url 'sales:delete_ticket_item' item.id %}"
               onsubmit="return askPin(this);">
             {% csrf_token %}
             <input type="hidden" name="manager_pin">
-            <button class="btn btn-danger btn-sm">🗑️حذف</button>
+            <button class="btn btn-danger btn-sm">🗑️</button>
         </form>
     </td>
 </tr>
@@ -84,10 +99,12 @@
     <td colspan="5" class="text-center">لا توجد عناصر</td>
 </tr>
 {% endfor %}
+</tbody>
 </table>
 
 <h4 class="text-end">
-    💰 الإجمالي: <span id="ticket-total">{{ ticket.total_amount }}</span>
+    💰 الإجمالي:
+    <span id="ticket-total">{{ ticket.total_amount }}</span>
 </h4>
 
 <hr>
@@ -95,21 +112,55 @@
 <!-- PAYMENT -->
 <form id="payment-form">
     {% csrf_token %}
-    <select name="payment_method" required>
+
+    <select name="payment_method"
+            id="payment-method"
+            class="form-select mb-2"
+            required>
         <option value="cash">نقداً</option>
         <option value="transfer">تحويل</option>
     </select>
 
-    <input type="text" name="transfer_number">
+    <input type="text"
+           name="transfer_number"
+           id="transfer-number"
+           class="form-control mb-2 d-none"
+           placeholder="رقم التحويل">
 
-    <button class="btn btn-primary w-100 mt-2">
+    <button type="submit" class="btn btn-primary w-100">
         ✔ إغلاق الطلب
     </button>
 </form>
 
+<!-- SHOW / HIDE TRANSFER NUMBER -->
+<script>
+const paymentMethod = document.getElementById('payment-method');
+const transferInput = document.getElementById('transfer-number');
+
+paymentMethod.addEventListener('change', function () {
+    if (this.value === 'transfer') {
+        transferInput.classList.remove('d-none');
+        transferInput.required = true;
+    } else {
+        transferInput.classList.add('d-none');
+        transferInput.required = false;
+        transferInput.value = '';
+    }
+});
+</script>
+
+<!-- CLOSE TICKET -->
 <script>
 document.getElementById('payment-form').addEventListener('submit', function(e) {
     e.preventDefault();
+
+    const paymentMethodValue = paymentMethod.value;
+    const transferNumber = transferInput.value;
+
+    if (paymentMethodValue === 'transfer' && !transferNumber.trim()) {
+        alert('⚠️ الرجاء إدخال رقم التحويل قبل إغلاق الطلب');
+        return;
+    }
 
     fetch("{% url 'sales:close_ticket' ticket.id %}", {
         method: "POST",
@@ -120,15 +171,20 @@ document.getElementById('payment-form').addEventListener('submit', function(e) {
     })
     .then(res => res.json())
     .then(data => {
+        if (data.error === 'transfer_required') {
+            alert('⚠️ رقم التحويل مطلوب');
+            return;
+        }
+
         if (data.success) {
             printTicket(data.ticket_id);
-            window.location.href = "{% url 'sales:pos' %}";
+            window.location.href = "{% url 'cashier_dashboard' %}";
         }
     });
 });
 </script>
 
-
+<!-- MANAGER PIN -->
 <script>
 function askPin(form) {
     const pin = prompt("أدخل رمز المدير:");
@@ -138,6 +194,7 @@ function askPin(form) {
 }
 </script>
 
+<!-- UPDATE QUANTITY -->
 <script>
 document.querySelectorAll('.qty-input').forEach(input => {
     input.addEventListener('change', function () {
@@ -166,6 +223,7 @@ document.querySelectorAll('.qty-input').forEach(input => {
 });
 </script>
 
+<!-- PRINT -->
 <script>
 function printTicket(ticketId) {
     const iframe = document.createElement('iframe');
@@ -178,6 +236,5 @@ function printTicket(ticketId) {
     }, 3000);
 }
 </script>
-
 
 {% endblock %}

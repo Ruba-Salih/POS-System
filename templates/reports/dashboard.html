@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}تقرير المبيعات{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4">📊 تقرير المبيعات</h2>
+
+<!-- FILTER -->
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-3">
+        <input type="date"
+               name="day"
+               class="form-control"
+               value="{{ request.GET.day }}">
+    </div>
+
+    <div class="col-md-3">
+        <input type="month"
+               name="month"
+               class="form-control"
+               value="{{ request.GET.month }}">
+    </div>
+
+    <div class="col-md-2">
+        <button class="btn btn-primary w-100">
+            فلترة
+        </button>
+    </div>
+</form>
+
+<!-- SUMMARY CARDS -->
+<div class="row g-3">
+
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6>💰 إجمالي المبيعات</h6>
+                <h3>{{ total_sales }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6>💸 إجمالي المصروفات</h6>
+                <h3>{{ total_expenses }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6>📈 الربح الصافي</h6>
+                <h3>{{ net_profit }}</h3>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- NAVIGATION -->
+<div class="mt-4 d-flex gap-2">
+    <a href="{% url 'reports:sales_list' %}"
+       class="btn btn-outline-secondary">
+        🧾 عرض كل الطلبات
+    </a>
+
+    <a href="{% url 'expenses:list' %}"
+       class="btn btn-outline-secondary">
+        💸 عرض كل المصروفات
+    </a>
+</div>
+
+
+{% endblock %}

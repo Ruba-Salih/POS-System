@@ -48,16 +48,14 @@ def manager_dashboard(request):
 
 @login_required
 def cashier_dashboard(request):
-    ticket = Ticket.objects.filter(
+    open_tickets = Ticket.objects.filter(
         cashier=request.user,
         status='open'
-    ).first()
+    ).order_by('-created_at')
 
-    # if exists → go to it
-    if ticket:
-        return redirect('sales:ticket_detail', ticket.id)
-
-    return render(request, 'staff/cashier_dashboard.html')
+    return render(request, 'staff/cashier_dashboard.html', {
+        'open_ticket': open_tickets
+    })
 
 @login_required
 def staff_home(request):

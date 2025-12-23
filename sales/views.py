@@ -2,32 +2,41 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
+from django.contrib.auth.hashers import check_password
+from django.contrib.auth import get_user_model
+
 from .models import Ticket, TicketItem
 from .forms import TicketItemForm
-from django.contrib.auth.hashers import check_password
 from inventory.models import Product
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
 
+# =========================
+# CREATE NEW TICKET
+# =========================
 @login_required
 def create_ticket(request):
-    ticket = Ticket.objects.create(cashier=request.user)
-    return redirect('sales:ticket_detail', ticket.id)
+    ticket = Ticket.objects.create(
+        cashier=request.user,
+        status='open'
+    )
+    return redirect('sales:pos', ticket_id=ticket.id)
 
+
+# =========================
+# POS VIEW (PER TICKET)
+# =========================
 @login_required
-def ticket_detail(request, ticket_id):
+def pos_view(request, ticket_id):
     ticket = get_object_or_404(
         Ticket,
         id=ticket_id,
-        cashier=request.user
+        cashier=request.user,
+        status='open'
     )
 
-    if ticket.status == 'closed':
-        messages.error(request, 'لا يمكن تعديل طلب مغلق')
-        return redirect('sales:pos')
-
+    products = Product.objects.filter(is_active=True)
     form = TicketItemForm(request.POST or None)
 
     if request.method == 'POST' and form.is_valid():
@@ -35,14 +44,18 @@ def ticket_detail(request, ticket_id):
         item.ticket = ticket
         item.price = item.product.price
         item.save()
-        return redirect('sales:ticket_detail', ticket.id)
+        return redirect('sales:pos', ticket_id=ticket.id)
 
-    return render(request, 'sales/ticket_detail.html', {
+    return render(request, 'sales/pos.html', {
         'ticket': ticket,
+        'products': products,
         'form': form
     })
 
 
+# =========================
+# CLOSE TICKET (AJAX)
+# =========================
 @login_required
 def close_ticket(request, ticket_id):
     ticket = get_object_or_404(
@@ -51,6 +64,9 @@ def close_ticket(request, ticket_id):
         cashier=request.user,
         status='open'
     )
+
+    if not ticket.items.exists():
+        return JsonResponse({'error': 'empty_ticket'}, status=400)
 
     payment_method = request.POST.get('payment_method')
     transfer_number = request.POST.get('transfer_number')
@@ -69,39 +85,21 @@ def close_ticket(request, ticket_id):
     })
 
 
-@login_required
-def pos_view(request):
-    # get or create open ticket
-    ticket, created = Ticket.objects.get_or_create(
-        cashier=request.user,
-        status='open'
-    )
-
-    products = Product.objects.filter(is_active=True)
-    form = TicketItemForm(request.POST or None)
-
-    if request.method == 'POST' and form.is_valid():
-        item = form.save(commit=False)
-        item.ticket = ticket
-        item.price = item.product.price
-        item.save()
-        return redirect('sales:pos')
-
-    return render(request, 'sales/pos.html', {
-        'ticket': ticket,
-        'products': products,
-        'form': form
-    })
-
+# =========================
+# DELETE ITEM (MANAGER PIN)
+# =========================
 @login_required
 def delete_ticket_item(request, item_id):
-    item = get_object_or_404(TicketItem, id=item_id)
+    item = get_object_or_404(
+        TicketItem,
+        id=item_id,
+        ticket__cashier=request.user
+    )
     ticket = item.ticket
 
-    # ❌ block closed tickets
     if ticket.status == 'closed':
         messages.error(request, 'لا يمكن تعديل طلب مغلق')
-        return redirect('sales:pos')
+        return redirect('sales:pos', ticket_id=ticket.id)
 
     if request.method == 'POST':
         manager_pin = request.POST.get('manager_pin')
@@ -113,16 +111,24 @@ def delete_ticket_item(request, item_id):
 
         if not manager or not check_password(manager_pin, manager.manager_pin):
             messages.error(request, 'رمز المدير غير صحيح')
-            return redirect('sales:pos')
+            return redirect('sales:pos', ticket_id=ticket.id)
 
         item.delete()
         messages.success(request, 'تم حذف المنتج بإذن المدير')
-        return redirect('sales:pos')
+
+    return redirect('sales:pos', ticket_id=ticket.id)
 
 
+# =========================
+# UPDATE QUANTITY (AJAX)
+# =========================
 @login_required
 def update_ticket_item(request, item_id):
-    item = get_object_or_404(TicketItem, id=item_id)
+    item = get_object_or_404(
+        TicketItem,
+        id=item_id,
+        ticket__cashier=request.user
+    )
     ticket = item.ticket
 
     if ticket.status == 'closed':
@@ -145,8 +151,15 @@ def update_ticket_item(request, item_id):
         'ticket_total': float(ticket.total_amount())
     })
 
+
+# =========================
+# PRINT RECEIPT
+# =========================
 @login_required
 def print_ticket(request, ticket_id):
-    ticket = get_object_or_404(Ticket, id=ticket_id)
+    ticket = get_object_or_404(
+        Ticket,
+        id=ticket_id,
+        cashier=request.user
+    )
     return render(request, 'sales/receipt.html', {'ticket': ticket})
-

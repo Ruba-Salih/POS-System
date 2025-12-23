@@ -21,21 +21,23 @@
     </a>
 
     <!-- Sales -->
-    <a href="#"
-       class="list-group-item list-group-item-action">
-       💵 المبيعات
-    </a>
+    <a href="{% url 'reports:sales_list' %}"
+      class="list-group-item list-group-item-action">
+      💵 المبيعات
+   </a>
+
 
     <!-- Expenses -->
-    <a href="#"
-       class="list-group-item list-group-item-action">
-       💸 المصروفات
+    <a href="{% url 'expenses:list' %}"
+      class="list-group-item list-group-item-action">
+      💸 المصروفات
     </a>
 
+
     <!-- Reports -->
-    <a href="#"
-       class="list-group-item list-group-item-action">
-       📊 التقارير
+    <a href="{% url 'reports:dashboard' %}"
+      class="list-group-item list-group-item-action">
+      📊 التقارير
     </a>
 
     <!-- 🔐 Manager PIN -->

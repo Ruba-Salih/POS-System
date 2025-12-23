@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}تفاصيل الطلب{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4">🧾 تفاصيل الطلب رقم {{ ticket.id }}</h2>
+
+<div class="mb-3">
+    <p><strong>الكاشير:</strong> {{ ticket.cashier.full_name|default:ticket.cashier.username }}</p>
+    <p>
+    <strong>طريقة الدفع:</strong>
+    {% if ticket.payment_method == 'cash' %}
+        نقداً
+    {% elif ticket.payment_method == 'transfer' %}
+        تحويل
+        {% if ticket.transfer_number %}
+            <br>
+            <br>
+            <strong>رقم التحويل:</strong> {{ ticket.transfer_number }}
+        {% endif %}
+    {% else %}
+        غير محدد
+    {% endif %}
+</p>
+
+    <p><strong>الحالة:</strong>
+        {% if ticket.status == 'closed' %}
+            <span class="badge bg-success">مغلق</span>
+        {% elif ticket.status == 'refunded' %}
+            <span class="badge bg-danger">مُرجع</span>
+        {% else %}
+            <span class="badge bg-secondary">{{ ticket.status }}</span>
+        {% endif %}
+    </p>
+    <p><strong>التاريخ:</strong> {{ ticket.created_at }}</p>
+</div>
+
+<hr>
+
+<h4>📦 المنتجات</h4>
+<br>
+<h4 class="text-start">
+    💰 الإجمالي:
+    <strong>{{ ticket.total_amount }}</strong>
+</h4>
+
+<table class="table table-bordered table-hover align-middle text-center">
+    <thead class="table-light">
+        <tr>
+            <th>المنتج</th>
+            <th>الكمية</th>
+            <th>السعر</th>
+            <th>الإجمالي</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for item in items %}
+        <tr>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.price }}</td>
+            <td>{{ item.price|floatformat:2 }}</td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="4" class="text-center text-muted">
+                لا توجد منتجات
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

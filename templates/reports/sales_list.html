@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}المبيعات{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4">🧾 كل الطلبات</h2>
+
+<!-- FILTER -->
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-3">
+        <input type="date" name="day" class="form-control">
+    </div>
+
+    <div class="col-md-3">
+        <input type="month" name="month" class="form-control">
+    </div>
+
+    <div class="col-md-2">
+        <button class="btn btn-primary w-100">فلترة</button>
+    </div>
+</form>
+
+<!-- SALES TABLE -->
+<table class="table table-bordered table-hover align-middle text-center">
+    <thead class="table-light">
+        <tr>
+            <th>#</th>
+            <th>الكاشير</th>
+            <th>الإجمالي</th>
+            <th>الحالة</th>
+            <th>إجراء</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for ticket in tickets %}
+        <tr>
+            <td>{{ ticket.id }}</td>
+            <td>{{ ticket.cashier.full_name|default:ticket.cashier.username }}</td>
+            <td>{{ ticket.total_amount }}</td>
+            <td>
+                {% if ticket.status == 'closed' %}
+                    <span class="badge bg-success">مغلق</span>
+                {% elif ticket.status == 'refunded' %}
+                    <span class="badge bg-danger">مُرجع</span>
+                {% else %}
+                    <span class="badge bg-secondary">{{ ticket.status }}</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'reports:ticket_detail' ticket.id %}"
+                   class="btn btn-sm btn-outline-primary mb-1">
+                    عرض
+                </a>
+
+                {% if ticket.status == 'closed' %}
+                <form method="post"
+                      action="{% url 'reports:refund_ticket' ticket.id %}"
+                      class="d-inline">
+                    {% csrf_token %}
+                    <input type="text"
+                           name="reason"
+                           class="form-control form-control-sm mb-1"
+                           placeholder="سبب الإرجاع"
+                           required>
+                    <button class="btn btn-sm btn-danger w-100">
+                        إرجاع
+                    </button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="5" class="text-center text-muted">
+                لا توجد طلبات
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
