@@ -73,8 +73,7 @@
                value="{{ item.quantity }}"
                min="1"
                class="form-control form-control-sm qty-input"
-               data-item-id="{{ item.id }}"
-               style="width:70px;">
+               data-item-id="{{ item.id }}">
     </td>
 
     <td>{{ item.price }}</td>
@@ -101,7 +100,7 @@
 </tbody>
 </table>
 
-<h4 class="text-end">
+<h4 class="text-start">
     💰 الإجمالي:
     <span id="ticket-total">{{ ticket.total_amount }}</span>
 </h4>
@@ -131,11 +130,11 @@
     </button>
 </form>
 
-<!-- ================= FIX PRODUCT SUBMIT (REAL FIX) ================= -->
+<!-- ================= JS (UNCHANGED) ================= -->
 <script>
 document.querySelectorAll('.product-form').forEach(form => {
     form.addEventListener('submit', function (e) {
-        e.preventDefault(); // 🔴 stop browser navigation
+        e.preventDefault();
 
         fetch(window.location.href, {
             method: 'POST',
@@ -145,15 +144,11 @@ document.querySelectorAll('.product-form').forEach(form => {
             },
             body: new URLSearchParams(new FormData(this))
         })
-        .then(() => {
-            // reload manually → NO jump
-            window.location.reload();
-        });
+        .then(() => window.location.reload());
     });
 });
 </script>
 
-<!-- SHOW / HIDE TRANSFER NUMBER -->
 <script>
 const paymentMethod = document.getElementById('payment-method');
 const transferInput = document.getElementById('transfer-number');
@@ -170,7 +165,6 @@ paymentMethod.addEventListener('change', function () {
 });
 </script>
 
-<!-- CLOSE TICKET -->
 <script>
 document.getElementById('payment-form').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -182,9 +176,7 @@ document.getElementById('payment-form').addEventListener('submit', function(e) {
 
     fetch("{% url 'sales:close_ticket' ticket.id %}", {
         method: "POST",
-        headers: {
-            "X-CSRFToken": "{{ csrf_token }}"
-        },
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
         body: new FormData(this)
     })
     .then(res => res.json())
@@ -197,7 +189,6 @@ document.getElementById('payment-form').addEventListener('submit', function(e) {
 });
 </script>
 
-<!-- MANAGER PIN -->
 <script>
 function askPin(form) {
     const pin = prompt("أدخل رمز المدير:");
@@ -207,7 +198,6 @@ function askPin(form) {
 }
 </script>
 
-<!-- UPDATE QUANTITY -->
 <script>
 document.querySelectorAll('.qty-input').forEach(input => {
     input.addEventListener('change', function () {
@@ -232,17 +222,13 @@ document.querySelectorAll('.qty-input').forEach(input => {
 });
 </script>
 
-<!-- PRINT -->
 <script>
 function printTicket(ticketId) {
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
     iframe.src = `/sales/ticket/${ticketId}/print/`;
     document.body.appendChild(iframe);
-
-    setTimeout(() => {
-        document.body.removeChild(iframe);
-    }, 3000);
+    setTimeout(() => document.body.removeChild(iframe), 3000);
 }
 </script>
 

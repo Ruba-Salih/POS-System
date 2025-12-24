@@ -77,6 +77,25 @@ body {
     border-color: #ffb3b3;
 }
 
+/* Logout button special */
+.navbar-logo {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.lemon-navbar .navbar-brand {
+    font-size: 1.1rem;
+    color: #ffffff;
+}
+.logout-btn {
+    border-color: rgba(255, 180, 180, 0.7);
+}
+
+.logout-btn:hover {
+    background: rgba(220, 53, 69, 0.2);
+    border-color: #ffb3b3;
+}
+
 /* =====================================================
    Cards
 ===================================================== */
@@ -177,3 +196,73 @@ tr:last-child td {
     font-size: 1.2rem;
     font-weight: bold;
 }
+
+
+/* ============================
+   GLOBAL CONFIRM MODAL (Custom)
+============================ */
+
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 9999;
+}
+
+.confirm-overlay.d-none {
+    display: none !important;
+}
+
+.confirm-modal {
+    width: 100%;
+    max-width: 420px;
+    background: var(--white);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.25);
+    border: 1px solid var(--border-soft);
+}
+
+.confirm-header {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+}
+
+.confirm-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff5f5;
+    border: 1px solid #ffd2d2;
+    font-size: 20px;
+}
+
+.confirm-title {
+    font-weight: 900;
+    color: var(--accent-dark);
+    margin-bottom: 4px;
+}
+
+.confirm-msg {
+    color: #475569;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+

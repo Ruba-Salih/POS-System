@@ -1,36 +1,74 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}إدارة المستخدمين{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/user-list.css' %}">
+{% endblock %}
+
 {% block content %}
-<h2>إدارة المستخدمين</h2>
 
-<a href="{% url 'create_user' %}" class="btn btn-success mb-3">➕ إضافة مستخدم</a>
+<div class="users-management">
 
-<table class="table table-bordered">
-<tr>
-    <th>اسم المستخدم</th>
-    <th>الاسم</th>
-    <th>الهاتف</th>
-    <th>السكن</th>
-    <th>الدور</th>
-    <th>إجراءات</th>
-</tr>
-{% for user in users %}
-<tr>
-    <td>{{ user.username }}</td>
-    <td>{{ user.full_name }}</td>
-    <td>{{ user.phone_number }}</td>
-    <td>{{ user.location }}</td>
-    <td>{{ user.get_role_display }}</td>
-    <td>
-        <a href="{% url 'update_user' user.id %}" class="btn btn-sm btn-warning">✏️تعديل</a>
-        <form method="POST"
-                  action="{% url 'delete_user' user.id %}"
-                  style="display:inline;"
-                  onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
-                {% csrf_token %}
-                <button class="btn btn-sm btn-danger">🗑️حذف</button>
-            </form>
-    </td>
-</tr>
-{% endfor %}
-</table>
+    <div class="users-header">
+        <h2>إدارة المستخدمين</h2>
+
+        <a href="{% url 'create_user' %}" class="btn btn-success">
+            ➕ إضافة مستخدم
+        </a>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>اسم المستخدم</th>
+                    <th>الاسم</th>
+                    <th>الهاتف</th>
+                    <th>السكن</th>
+                    <th>الدور</th>
+                    <th>إجراءات</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.full_name }}</td>
+                    <td>{{ user.phone_number }}</td>
+                    <td>{{ user.location }}</td>
+                    <td>{{ user.get_role_display }}</td>
+                    <td class="actions-cell">
+                        <a href="{% url 'update_user' user.id %}"
+                           class="btn btn-sm btn-warning">
+                            ✏️ تعديل
+                        </a>
+
+                        <form method="POST"
+                              action="{% url 'delete_user' user.id %}"
+                              class="inline-form">
+                            {% csrf_token %}
+                            <button type="submit"
+                                class="btn btn-sm btn-danger"
+                                data-msg="هل أنت متأكد من حذف المستخدم؟">
+                                🗑️ حذف
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="empty-row">
+                        لا يوجد مستخدمون
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
 {% endblock %}

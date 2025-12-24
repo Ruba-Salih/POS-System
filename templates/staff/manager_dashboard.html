@@ -1,61 +1,66 @@
 <!-- templates/staff/manager_dashboard.html -->
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}لوحة تحكم المدير{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/manager-dashboard.css' %}">
+{% endblock %}
+
 {% block content %}
-<h2 class="mb-4">مرحباً {{ user.full_name }} 👋</h2>
 
-<div class="list-group">
+<div class="manager-dashboard">
 
-    <!-- Users -->
-    <a href="{% url 'staff_list' %}"
-       class="list-group-item list-group-item-action">
-       👥 إدارة المستخدمين
-    </a>
+    <h2 class="manager-title">
+        مرحباً {{ user.full_name }} 👋
+    </h2>
 
-    <!-- Products / Inventory -->
-    <a href="{% url 'inventory:product_list' %}"
-       class="list-group-item list-group-item-action">
-       📦 إدارة المنتجات
-    </a>
+    <div class="manager-menu">
 
-    <!-- Sales -->
-    <a href="{% url 'reports:sales_list' %}"
-      class="list-group-item list-group-item-action">
-      💵 المبيعات
-   </a>
+        <!-- Users -->
+        <a href="{% url 'staff_list' %}" class="manager-item">
+            👥 إدارة المستخدمين
+        </a>
 
+        <!-- Products -->
+        <a href="{% url 'inventory:product_list' %}" class="manager-item">
+            📦 إدارة المنتجات
+        </a>
 
-    <!-- Expenses -->
-    <a href="{% url 'expenses:list' %}"
-      class="list-group-item list-group-item-action">
-      💸 المصروفات
-    </a>
+        <!-- Sales -->
+        <a href="{% url 'reports:sales_list' %}" class="manager-item">
+            💵 المبيعات
+        </a>
 
+        <!-- Expenses -->
+        <a href="{% url 'expenses:list' %}" class="manager-item">
+            💸 المصروفات
+        </a>
 
-    <!-- Reports -->
-    <a href="{% url 'reports:dashboard' %}"
-      class="list-group-item list-group-item-action">
-      📊 التقارير
-    </a>
+        <!-- Reports -->
+        <a href="{% url 'reports:dashboard' %}" class="manager-item">
+            📊 التقارير
+        </a>
 
-    <!-- 🔐 Manager PIN -->
-    <a href="{% url 'set_manager_pin' %}"
-       class="list-group-item list-group-item-action">
-       🔑 تعيين / تغيير رمز المدير
-       {% if user.manager_pin %}
-           <span class="badge bg-success float-end">مُعيَّن</span>
-       {% else %}
-           <span class="badge bg-danger float-end">غير مُعيَّن</span>
-       {% endif %}
-    </a>
+        <!-- Manager PIN -->
+        <a href="{% url 'set_manager_pin' %}" class="manager-item manager-pin">
+            🔑 تعيين / تغيير رمز المدير
 
-    <!-- Change Password -->
-    <a href="{% url 'change_password' %}"
-       class="list-group-item list-group-item-action">
-       🔐 تغيير كلمة المرور
-    </a>
+            {% if user.manager_pin %}
+                <span class="status-badge success">مُعيَّن</span>
+            {% else %}
+                <span class="status-badge danger">غير مُعيَّن</span>
+            {% endif %}
+        </a>
+
+        <!-- Change Password -->
+        <a href="{% url 'change_password' %}" class="manager-item">
+            🔐 تغيير كلمة المرور
+        </a>
+
+    </div>
 
 </div>
+
 {% endblock %}

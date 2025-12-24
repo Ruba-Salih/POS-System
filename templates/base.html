@@ -12,13 +12,32 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark lemon-navbar mb-4">
     <div class="container-fluid">
 
-        <span class="navbar-brand">نظام الكافتيريا ليمون</span>
+        <!-- Brand -->
+        <div class="d-flex align-items-center gap-2">
+            <span class="navbar-logo">🍋</span>
+            <span class="navbar-brand fw-bold">
+                نظام كافتيريا ليمون
+            </span>
+        </div>
 
         {% if user.is_authenticated %}
-        <div class="d-flex gap-3">
+        <div class="d-flex gap-3 align-items-center">
+
+            <!-- 🏠 Home (based on user role) -->
+            {% if user.role == 'manager' %}
+                <a href="{% url 'manager_dashboard' %}"
+                   class="btn btn-outline-success btn-sm">
+                    🏠 الرئيسية 
+                </a>
+            {% elif user.role == 'cashier' %}
+                <a href="{% url 'cashier_dashboard' %}"
+                   class="btn btn-outline-success btn-sm">
+                    🏠  الرئيسية
+                </a>
+            {% endif %}
 
             <!-- 🔙 Back -->
             <a href="javascript:history.back()"
@@ -38,6 +57,7 @@
     </div>
 </nav>
 
+
 <div class="container">
     {% block content %}{% endblock %}
 </div>
@@ -51,6 +71,97 @@
     {% endfor %}
 </div>
 {% endif %}
+
+<!-- ✅ Global Confirm Modal -->
+<div id="confirmOverlay" class="confirm-overlay d-none">
+  <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="confirm-header">
+      <div class="confirm-icon">⚠️</div>
+      <div>
+        <div id="confirmTitle" class="confirm-title">تأكيد العملية</div>
+        <div id="confirmMsg" class="confirm-msg">هل أنت متأكد؟</div>
+      </div>
+    </div>
+
+    <div class="confirm-actions">
+      <button type="button" id="confirmCancel" class="btn btn-outline-secondary btn-sm">
+        إلغاء
+      </button>
+      <button type="button" id="confirmOk" class="btn btn-danger btn-sm">
+        نعم، احذف
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const overlay = document.getElementById('confirmOverlay');
+  const msgEl = document.getElementById('confirmMsg');
+  const btnOk = document.getElementById('confirmOk');
+  const btnCancel = document.getElementById('confirmCancel');
+
+  let pendingAction = null; // function to execute on confirm
+
+  function openModal(message, actionFn) {
+    pendingAction = actionFn;
+    msgEl.textContent = message || 'هل أنت متأكد؟';
+    overlay.classList.remove('d-none');
+  }
+
+  function closeModal() {
+    pendingAction = null;
+    overlay.classList.add('d-none');
+  }
+
+  // Close when clicking outside
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) closeModal();
+  });
+
+  btnCancel.addEventListener('click', closeModal);
+
+  btnOk.addEventListener('click', function () {
+    if (typeof pendingAction === 'function') {
+      pendingAction();
+    }
+    closeModal();
+  });
+
+  // ✅ GLOBAL INTERCEPT (links + forms)
+  document.addEventListener('click', function (e) {
+
+    /* ---------- HANDLE LINKS ---------- */
+    const link = e.target.closest('a.btn-danger');
+    if (link && link.getAttribute('href')) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const msg = link.getAttribute('data-msg') || 'هل أنت متأكد؟';
+      openModal(msg, () => {
+        window.location.href = link.href;
+      });
+      return;
+    }
+
+    /* ---------- HANDLE FORMS ---------- */
+    const btn = e.target.closest('button.btn-danger');
+    if (!btn) return;
+
+    const form = btn.closest('form');
+    if (!form) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const msg = btn.getAttribute('data-msg') || 'هل أنت متأكد؟';
+    openModal(msg, () => {
+      form.submit();
+    });
+
+  }, true);
+})();
+</script>
 
 </body>
 </html>

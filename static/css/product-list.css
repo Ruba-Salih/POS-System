@@ -1,0 +1,94 @@
+/* ============================
+   PRODUCTS MANAGEMENT PAGE
+============================ */
+
+.products-management {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* ============================
+   HEADER
+============================ */
+
+.products-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.products-header h2 {
+    font-weight: 800;
+    color: var(--green-dark);
+    margin: 0;
+}
+
+/* ============================
+   TABLE WRAPPER
+============================ */
+
+.table-wrapper {
+    background: var(--white);
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    overflow-x: auto;
+}
+
+/* ============================
+   TABLE
+============================ */
+
+.products-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.products-table thead th {
+    background: linear-gradient(135deg, var(--accent-soft), #e6edf6);
+    color: var(--accent-dark);
+    font-weight: 800;
+    padding: 12px;
+    border-bottom: 1px solid var(--border-soft);
+    text-align: right;
+}
+
+.products-table tbody td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-soft);
+    vertical-align: middle;
+}
+
+/* Zebra rows */
+.products-table tbody tr:nth-child(even) td {
+    background: #fafbfc;
+}
+
+/* Hover */
+.products-table tbody tr:hover td {
+    background: #f0fbf6;
+}
+
+/* ============================
+   ACTIONS
+============================ */
+
+.actions-cell {
+    white-space: nowrap;
+}
+
+.actions-cell .btn {
+    margin-inline-start: 6px;
+}
+
+/* ============================
+   EMPTY STATE
+============================ */
+
+.empty-row {
+    text-align: center;
+    color: #6c757d;
+    padding: 20px;
+    font-weight: 600;
+}

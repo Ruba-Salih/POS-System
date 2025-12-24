@@ -1,28 +1,87 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>تسجيل الدخول</title>
+    <meta charset="UTF-8">
+    <title>تسجيل الدخول</title>
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap.rtl.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
-<body>
-  <h2>تسجيل الدخول للنظام</h2>
-  <form method="POST">
-    {% csrf_token %}
-    <label>اسم المستخدم:</label><br>
-    <input type="text" name="username"><br><br>
+<body class="d-flex align-items-center justify-content-center" style="min-height:100vh;">
 
-    <label>كلمة المرور:</label><br>
-    <input type="password" name="password"><br><br>
+<div class="w-100" style="max-width:450px;">
 
-    <button type="submit">دخول</button>
-  </form>
+    <!-- Card -->
+    <div class="card shadow-lg border-0 p-4">
 
-  {% if messages %}
-    <ul>
-      {% for message in messages %}
-        <li>{{ message }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
+        <!-- Logo / Title -->
+        <div class="text-center mb-4">
+            <div style="font-size:42px;">🍋</div>
+            <h3 class="fw-bold text-success mt-2">
+                نظام كافتيريا ليمون
+            </h3>
+            <br>
+            <p class="text-muted mb-0">
+                تسجيل الدخول إلى النظام
+            </p>
+            <br>
+        </div>
+
+        <!-- Form -->
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- Username -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">
+                    اسم المستخدم
+                </label>
+                <input type="text"
+                       name="username"
+                       class="form-control"
+                       placeholder="أدخل اسم المستخدم"
+                       required
+                       autofocus>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">
+                    كلمة المرور
+                </label>
+                <input type="password"
+                       name="password"
+                       class="form-control"
+                       placeholder="أدخل كلمة المرور"
+                       required>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn btn-green w-100 py-2">
+                🔐 دخول
+            </button>
+        </form>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mt-3">
+            {% for message in messages %}
+                <div class="alert alert-danger text-center mb-2">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center text-muted mt-3 mb-0" style="font-size:0.85rem;">
+        © {{ now|date:"Y" }} نظام كافتيريا ليمون
+    </p>
+
+</div>
+
 </body>
 </html>

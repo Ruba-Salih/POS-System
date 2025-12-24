@@ -1,88 +1,157 @@
-/* PRODUCT SLIDER */
+/* ============================
+   PRODUCT SLIDER (Improved spacing)
+============================ */
 
 .products-slider {
     display: grid;
     grid-auto-flow: column;
     grid-template-rows: repeat(2, 1fr);
-    gap: 12px;
+    gap: 16px;                 /* more breathing room */
     overflow-x: auto;
-    padding-bottom: 10px;
+    padding: 10px 6px 14px;    /* comfortable touch spacing */
 }
 
+/* Scrollbar */
 .products-slider::-webkit-scrollbar {
-    height: 8px;
+    height: 6px;
 }
 
 .products-slider::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 4px;
+    background: #cbd5e1;
+    border-radius: 999px;
 }
+
+/* ============================
+   PRODUCT CARD (Better size)
+============================ */
 
 .product-card {
-    width: 140px;
-    height: 160px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background: #fff;
-    padding: 8px;
+    width: 155px;              /* wider = less cramped */
+    height: 175px;             /* taller for content */
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #ffffff;
+    padding: 12px;             /* more internal space */
     text-align: center;
     cursor: pointer;
-    transition: 0.15s;
+
+    transition:
+        background 0.15s ease,
+        transform 0.12s ease,
+        box-shadow 0.15s ease;
 }
 
-.product-card:hover {
-    background: #f8f9fa;
-    transform: scale(1.03);
+/* Hover / focus */
+.product-card:hover,
+.product-card:focus {
+    background: #f9fafb;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
 }
+
+/* Touch feedback */
+.product-card:active {
+    transform: scale(0.97);
+}
+
+/* ============================
+   PRODUCT IMAGE
+============================ */
 
 .product-image {
-    height: 70px;
+    height: 85px;              /* more visual balance */
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: 8px;
 }
 
 .product-image img {
-    max-height: 60px;
+    max-height: 75px;
+    max-width: 100%;
+    object-fit: contain;
 }
 
 .no-image {
-    font-size: 32px;
+    font-size: 36px;
+    opacity: 0.6;
 }
 
+/* ============================
+   PRODUCT TEXT
+============================ */
+
 .product-name {
-    font-size: 13px;
-    font-weight: bold;
+    font-size: 14px;           /* clearer text */
+    font-weight: 700;
+    line-height: 1.25;
+    margin-bottom: 6px;
+    min-height: 36px;          /* keeps cards aligned */
+    color: var(--text-dark);
 }
 
 .product-price {
-    margin-top: 4px;
-    background: #6c757d;
-    color: #fff;
-    font-size: 12px;
-    padding: 2px 6px;
-    border-radius: 5px;
+    display: inline-block;
+    margin-top: 6px;
+    padding: 5px 12px;         /* bigger tap target */
+    border-radius: 999px;
+
+    background: #f1f5f9;
+    color: var(--green-dark);
+    font-size: 13px;
+    font-weight: 700;
+
+    border: 1px solid #d1e7dd;
 }
 
+/* ============================
+   ORDER TABLE
+============================ */
 
-/* ===== Close Ticket Button (اغلاق الطلب) ===== */
+.qty-input {
+    width: 72px;               /* slightly wider */
+    text-align: center;
+    padding: 6px;
+    
+}
+
+/* ============================
+   CLOSE TICKET BUTTON (Primary Action)
+============================ */
+
 #payment-form .btn.btn-primary {
     background: linear-gradient(135deg, var(--green-main), #2fbf71);
     border: none;
     color: var(--white);
-    font-weight: bold;
-    border-radius: 12px;
-    padding: 14px;
-    font-size: 1.05rem;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    font-weight: 800;
+    border-radius: 16px;       /* stronger primary feel */
+    padding: 10px;             /* BIG & touch-friendly */
+    margin: 0 auto;
+    display: block;
+    font-size: 1.15rem;
+    max-width: 260px;
+    margin-bottom: 23px;
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        opacity 0.15s ease;
 }
 
+/* Hover */
 #payment-form .btn.btn-primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 14px rgba(25, 135, 84, 0.35);
+    box-shadow: 0 8px 18px rgba(25, 135, 84, 0.35);
     opacity: 0.95;
 }
 
+/* Active (touch feedback) */
 #payment-form .btn.btn-primary:active {
-    transform: scale(0.98);
+    transform: scale(0.96);
+}
+
+/* Disabled (future-safe) */
+#payment-form .btn.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }

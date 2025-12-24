@@ -1,0 +1,94 @@
+/* ============================
+   MANAGER DASHBOARD
+============================ */
+
+.manager-dashboard {
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+/* ============================
+   TITLE
+============================ */
+
+.manager-title {
+    background: linear-gradient(135deg, var(--green-dark), var(--green-main));
+    color: var(--white);
+    padding: 16px 20px;
+    border-radius: 14px;
+    font-weight: 800;
+    margin-bottom: 24px;
+}
+
+/* ============================
+   MENU LIST
+============================ */
+
+.manager-menu {
+    background: var(--white);
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+/* ============================
+   MENU ITEM
+============================ */
+
+.manager-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 16px 18px;
+    text-decoration: none;
+    color: var(--text-dark);
+    font-weight: 600;
+
+    border-bottom: 1px solid var(--green-light);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.manager-item:last-child {
+    border-bottom: none;
+}
+
+/* Hover / focus */
+.manager-item:hover,
+.manager-item:focus {
+    background: #f0fbf6; /* very soft green */
+    color: var(--green-dark);
+}
+
+/* ============================
+   MANAGER PIN ROW
+============================ */
+
+.manager-pin {
+    font-weight: 700;
+}
+
+/* ============================
+   STATUS BADGES
+============================ */
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+/* Assigned */
+.status-badge.success {
+    background: #e6f4ee;
+    color: var(--green-dark);
+    border: 1px solid var(--green-light);
+}
+
+/* Not assigned */
+.status-badge.danger {
+    background: #fdecec;
+    color: #b42318;
+    border: 1px solid #f5c2c7;
+}

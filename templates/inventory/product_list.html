@@ -1,42 +1,71 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}إدارة المنتجات{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/product-list.css' %}">
+{% endblock %}
+
 {% block content %}
 
-<h2>📦 المنتجات</h2>
+<div class="products-management">
 
-{% if user.role == 'manager' %}
-<a href="{% url 'inventory:product_create' %}" class="btn btn-success mb-3">
-    ➕ إضافة منتج
-</a>
-{% endif %}
+    <div class="products-header">
+        <h2>📦 المنتجات</h2>
 
-<table class="table table-bordered">
-<tr>
-    <th>اسم المنتج</th>
-    <th>السعر</th>
-    {% if user.role == 'manager' %}
-    <th>إجراءات</th>
-    {% endif %}
-</tr>
-
-{% for product in products %}
-<tr>
-    <td>{{ product.name }}</td>
-    <td>{{ product.price }}</td>
-
-    {% if user.role == 'manager' %}
-    <td>
-        <a href="{% url 'inventory:product_update' product.id %}" class="btn btn-sm btn-warning">
-            ✏️ تعديل
+        {% if user.role == 'manager' %}
+        <a href="{% url 'inventory:product_create' %}" class="btn btn-success">
+            ➕ إضافة منتج
         </a>
-        <a href="{% url 'inventory:product_delete' product.id %}"
-           class="btn btn-sm btn-danger"
-           onclick="return confirm('هل أنت متأكد من الحذف؟');">
-           🗑️ حذف
-        </a>
-    </td>
-    {% endif %}
-</tr>
-{% endfor %}
-</table>
+        {% endif %}
+    </div>
+
+    <div class="table-wrapper">
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th>اسم المنتج</th>
+                    <th>السعر</th>
+                    {% if user.role == 'manager' %}
+                    <th>إجراءات</th>
+                    {% endif %}
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.price }}</td>
+
+                    {% if user.role == 'manager' %}
+                    <td class="actions-cell">
+                        <a href="{% url 'inventory:product_update' product.id %}"
+                           class="btn btn-sm btn-warning">
+                            ✏️ تعديل
+                        </a>
+
+                        <a href="{% url 'inventory:product_delete' product.id %}"
+                           class="btn btn-danger"
+                           data-msg="هل أنت متأكد من الحذف؟">
+                           🗑️ حذف
+                        </a>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{% if user.role == 'manager' %}3{% else %}2{% endif %}"
+                        class="empty-row">
+                        لا توجد منتجات
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
 
 {% endblock %}

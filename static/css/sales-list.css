@@ -1,0 +1,145 @@
+/* ============================
+   SALES PAGE
+============================ */
+
+.sales-page {
+    max-width: 1100px;
+    margin: auto;
+}
+
+/* ============================
+   PAGE TITLE
+============================ */
+
+.page-title {
+    font-weight: 900;
+    margin-bottom: 18px;
+    color: var(--green-dark);
+}
+
+/* ============================
+   FILTER
+============================ */
+
+.sales-filter {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.sales-filter .btn {
+    min-width: 120px;
+}
+
+/* ============================
+   TABLE WRAPPER
+============================ */
+
+.table-wrapper {
+    background: var(--white);
+    border-radius: 14px;
+    border: 1px solid var(--border-soft);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+/* ============================
+   SALES TABLE
+============================ */
+
+.sales-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sales-table thead {
+    background: linear-gradient(135deg, var(--accent-soft), #e6edf6);
+}
+
+.sales-table th {
+    padding: 14px;
+    font-weight: 800;
+    color: var(--accent-dark);
+    border-bottom: 1px solid var(--border-soft);
+    text-align: center;
+}
+
+.sales-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-soft);
+    text-align: center;
+}
+
+.sales-table tr:nth-child(even) td {
+    background: #fafbfc;
+}
+
+.sales-table tr:hover td {
+    background: #f0fbf6;
+}
+
+.sales-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* ============================
+   BADGES
+============================ */
+
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.badge-success {
+    background: var(--green-main);
+    color: #fff;
+}
+
+.badge-danger {
+    background: #dc3545;
+    color: #fff;
+}
+
+.badge-secondary {
+    background: #6c757d;
+    color: #fff;
+}
+
+/* ============================
+   ACTIONS
+============================ */
+
+.actions-cell {
+    min-width: 200px;
+}
+
+.actions-cell .btn {
+    margin-bottom: 6px;
+}
+
+/* ============================
+   REFUND FORM
+============================ */
+
+.refund-form {
+    margin-top: 6px;
+}
+
+.refund-form input {
+    margin-bottom: 6px;
+}
+
+/* ============================
+   EMPTY STATE
+============================ */
+
+.empty-row {
+    padding: 20px;
+    text-align: center;
+    color: #6c757d;
+    font-weight: 600;
+}
