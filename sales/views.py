@@ -54,6 +54,19 @@ def pos_view(request, ticket_id=None):
         item.price = item.product.price
         item.save()
 
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'ticket_id': ticket.id,
+                'item': {
+                    'id': item.id,
+                    'product': item.product.name,
+                    'price': float(item.price),
+                    'quantity': item.quantity,
+                    'subtotal': float(item.subtotal()),
+                },
+                'ticket_total': float(ticket.total_amount())
+            })
+
         return redirect('sales:pos', ticket_id=ticket.id)
 
     return render(request, 'sales/pos.html', {
@@ -124,7 +137,11 @@ def delete_ticket_item(request, item_id):
             return redirect('sales:pos', ticket_id=ticket.id)
 
         item.delete()
-        messages.success(request, 'تم حذف المنتج بإذن المدير')
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'ticket_total': float(ticket.total_amount())
+            })
 
         # 🧹 لو حذف آخر عنصر → احذف Ticket
         if not ticket.items.exists():

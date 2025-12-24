@@ -6,6 +6,7 @@
 {% endblock %}
 
 {% block content %}
+<div id="pos-root" data-ticket-id="{{ ticket.id|default:'' }}"></div>
 
 <!-- HEADER -->
 {% if ticket %}
@@ -54,8 +55,9 @@
 
 <hr>
 
-{% if ticket %}
+
 <!-- CURRENT ORDER -->
+<div data-ticket-section class="{% if not ticket %}d-none{% endif %}">
 <table class="table table-bordered align-middle">
 <thead>
 <tr>
@@ -67,7 +69,7 @@
 </tr>
 </thead>
 
-<tbody>
+<tbody id="ticket-items-body">
 {% for item in ticket.items.all %}
 <tr>
     <td>{{ item.product.name }}</td>
@@ -90,17 +92,18 @@
         <form method="POST"
               action="{% url 'sales:delete_ticket_item' item.id %}"
               class="delete-item-form"
-              onsubmit="return askPin(this);">
+              data-item-id="{{ item.id }}">
             {% csrf_token %}
-            <input type="hidden" name="manager_pin">
+            
             <button type="submit" class="btn btn-danger btn-sm">🗑️حذف</button>
         </form>
     </td>
 </tr>
 {% empty %}
-<tr>
+<tr id="empty-row">
     <td colspan="5" class="text-center">لا توجد عناصر</td>
 </tr>
+
 {% endfor %}
 </tbody>
 </table>
@@ -134,23 +137,60 @@
         ✔ إغلاق الطلب
     </button>
 </form>
-{% endif %}
+</div>
 
-<!-- ================= JS (UNCHANGED) ================= -->
 <script>
-document.querySelectorAll('.product-form').forEach(form => {
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
-        fetch(window.location.href, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: new URLSearchParams(new FormData(this))
-        })
-        .then(() => window.location.reload());
+const posRoot = document.getElementById('pos-root');
+
+// BASE url (NO ID here)
+const CLOSE_TICKET_BASE_URL = "/sales/ticket/";
+
+function getTicketId() {
+    return posRoot.dataset.ticketId;
+}
+
+function setTicketId(id) {
+    posRoot.dataset.ticketId = id;
+}
+
+</script>
+
+<script>
+document.getElementById('payment-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    if (paymentMethod.value === 'transfer' && !transferInput.value.trim()) {
+        alert('⚠️ الرجاء إدخال رقم التحويل قبل إغلاق الطلب');
+        return;
+    }
+
+    const ticketId = getTicketId();
+    if (!ticketId) {
+        alert('❌ لا يوجد طلب مفتوح');
+        return;
+    }
+
+    fetch(`${CLOSE_TICKET_BASE_URL}${ticketId}/close/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: new FormData(this)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+           printTicket(data.ticket_id);
+            setTicketId('');
+            document.getElementById('ticket-total').innerText = '0.00';
+            window.location.href = "{% url 'cashier_dashboard' %}";
+
+        } else {
+            alert('❌ لم يتم إغلاق الطلب');
+        }
     });
 });
 </script>
@@ -171,65 +211,153 @@ paymentMethod.addEventListener('change', function () {
 });
 </script>
 
-{% if ticket %}
 <script>
-document.getElementById('payment-form').addEventListener('submit', function(e) {
-    e.preventDefault();
+document.querySelectorAll('.product-form').forEach(form => {
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
 
-    if (paymentMethod.value === 'transfer' && !transferInput.value.trim()) {
-        alert('⚠️ الرجاء إدخال رقم التحويل قبل إغلاق الطلب');
-        return;
-    }
-
-    fetch("{% url 'sales:close_ticket' ticket.id %}", {
-        method: "POST",
-        headers: { "X-CSRFToken": "{{ csrf_token }}" },
-        body: new FormData(this)
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            printTicket(data.ticket_id);
-            window.location.href = "{% url 'cashier_dashboard' %}";
-        }
-    });
-});
-</script>
-{% endif %}
-
-
-<script>
-function askPin(form) {
-    const pin = prompt("أدخل رمز المدير:");
-    if (!pin) return false;
-    form.querySelector('input[name="manager_pin"]').value = pin;
-    return true;
-}
-</script>
-
-<script>
-document.querySelectorAll('.qty-input').forEach(input => {
-    input.addEventListener('change', function () {
-        fetch(`/sales/item/update/${this.dataset.itemId}/`, {
+        fetch(window.location.pathname, {
             method: 'POST',
             headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
+                'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-Requested-With': 'XMLHttpRequest',
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: `quantity=${this.value}`
+            body: new URLSearchParams(new FormData(this))
         })
         .then(res => res.json())
         .then(data => {
-            if (!data.error) {
-                document.getElementById(`item-subtotal-${this.dataset.itemId}`)
-                    .innerText = data.item_subtotal.toFixed(2);
-                document.getElementById('ticket-total')
-                    .innerText = data.ticket_total.toFixed(2);
+
+            /* 🧠 first product → update URL */
+            if (!getTicketId()) {
+                setTicketId(data.ticket_id);
+                history.replaceState({}, '', `/sales/pos/${data.ticket_id}/`);
             }
+
+            /* show order + payment */
+            document.querySelector('[data-ticket-section]').classList.remove('d-none');
+
+            /* update total */
+            document.getElementById('ticket-total').innerText =
+                data.ticket_total.toFixed(2);
+
+            /* ✅ ADD ROW */
+            const tbody = document.getElementById('ticket-items-body');
+
+            const emptyRow = document.getElementById('empty-row');
+            if (emptyRow) {
+                emptyRow.remove();
+            }
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${data.item.product}</td>
+                <td>
+                    <input type="number"
+                           value="${data.item.quantity}"
+                           min="1"
+                           class="form-control form-control-sm qty-input"
+                           data-item-id="${data.item.id}">
+                </td>
+                <td>${data.item.price}</td>
+                <td id="item-subtotal-${data.item.id}">
+                    ${data.item.subtotal.toFixed(2)}
+                </td>
+                <td>
+                    <form method="POST"
+                          action="/sales/item/delete/${data.item.id}/"
+                          class="delete-item-form"
+                          data-item-id="${data.item.id}">
+            
+                        <button class="btn btn-danger btn-sm">🗑️حذف</button>
+                    </form>
+                </td>
+            `;
+
+            tbody.appendChild(row);
         });
     });
 });
 </script>
+
+<script>
+document.addEventListener('change', function (e) {
+    if (!e.target.classList.contains('qty-input')) return;
+
+    const input = e.target;
+    const itemId = input.dataset.itemId;
+
+    fetch(`/sales/item/update/${itemId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `quantity=${input.value}`
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) return;
+
+        // ✅ update item subtotal
+        document.getElementById(`item-subtotal-${itemId}`)
+            .innerText = data.item_subtotal.toFixed(2);
+
+        // ✅ update ticket total
+        document.getElementById('ticket-total')
+            .innerText = data.ticket_total.toFixed(2);
+    });
+});
+</script>
+
+<script>
+document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.delete-item-form button');
+    if (!btn) return;
+
+    e.preventDefault();
+
+    const form = btn.closest('.delete-item-form');
+    const itemId = form.dataset.itemId;
+    const actionUrl = form.action;
+
+    const pin = prompt('🔐 أدخل رمز المدير:');
+    if (!pin) return;
+
+    const formData = new FormData();
+    formData.append('manager_pin', pin);
+    formData.append('csrfmiddlewaretoken', csrfToken);
+
+
+    fetch(actionUrl, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken
+        },
+        body: formData
+    })
+    .then(res =>res.json())// backend redirects
+    .then(() => {
+        // ✅ remove row
+        const row = form.closest('tr');
+        row.remove();
+
+        // ✅ if no items left
+        const tbody = document.getElementById('ticket-items-body');
+        if (!tbody.querySelector('tr')) {
+            tbody.innerHTML = `
+                <tr id="empty-row">
+                    <td colspan="5" class="text-center">لا توجد عناصر</td>
+                </tr>
+            `;
+        }
+    })
+    .catch(() => {
+        alert('❌ رمز المدير غير صحيح');
+    });
+});
+</script>
+
 
 <script>
 function printTicket(ticketId) {
