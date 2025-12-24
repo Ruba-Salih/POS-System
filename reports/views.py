@@ -10,7 +10,8 @@ from expenses.models import Expense
 
 @user_passes_test(is_manager)
 def dashboard(request):
-    tickets = Ticket.objects.filter(status='closed')
+    tickets = Ticket.objects.filter(
+        status='closed',items__isnull=False).distinct()
 
     day = request.GET.get('day')
     month = request.GET.get('month')
@@ -60,7 +61,10 @@ def dashboard(request):
 
 @user_passes_test(is_manager)
 def sales_list(request):
-    tickets = Ticket.objects.select_related('cashier').filter(status='closed')
+    tickets = Ticket.objects.select_related('cashier').filter(
+        status='closed',
+        items__isnull=False
+        ).distinct()
 
     day = request.GET.get('day')
     month = request.GET.get('month')

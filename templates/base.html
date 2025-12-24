@@ -151,6 +151,10 @@
     const form = btn.closest('form');
     if (!form) return;
 
+    if (form.classList.contains('delete-item-form')) {
+    return; // ⛔ لا تتدخل
+    }
+
     e.preventDefault();
     e.stopPropagation();
 

@@ -50,8 +50,9 @@ def manager_dashboard(request):
 def cashier_dashboard(request):
     open_tickets = Ticket.objects.filter(
         cashier=request.user,
-        status='open'
-    ).order_by('-created_at')
+        status='open',
+        items__isnull=False
+    ).distinct().order_by('-created_at')
 
     return render(request, 'staff/cashier_dashboard.html', {
         'open_ticket': open_tickets

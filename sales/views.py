@@ -17,33 +17,43 @@ User = get_user_model()
 # =========================
 @login_required
 def create_ticket(request):
-    ticket = Ticket.objects.create(
-        cashier=request.user,
-        status='open'
-    )
-    return redirect('sales:pos', ticket_id=ticket.id)
+    # ❌ لا ننشئ Ticket هنا
+    # فقط نفتح صفحة POS
+    return redirect('sales:pos')
 
 
 # =========================
-# POS VIEW (PER TICKET)
+# POS VIEW (PER TICKET OR NEW)
 # =========================
 @login_required
-def pos_view(request, ticket_id):
-    ticket = get_object_or_404(
-        Ticket,
-        id=ticket_id,
-        cashier=request.user,
-        status='open'
-    )
+def pos_view(request, ticket_id=None):
+    ticket = None
+
+    if ticket_id:
+        ticket = get_object_or_404(
+            Ticket,
+            id=ticket_id,
+            cashier=request.user,
+            status='open'
+        )
 
     products = Product.objects.filter(is_active=True)
     form = TicketItemForm(request.POST or None)
 
     if request.method == 'POST' and form.is_valid():
+
+        # ✅ إنشاء Ticket عند أول منتج فقط
+        if ticket is None:
+            ticket = Ticket.objects.create(
+                cashier=request.user,
+                status='open'
+            )
+
         item = form.save(commit=False)
         item.ticket = ticket
         item.price = item.product.price
         item.save()
+
         return redirect('sales:pos', ticket_id=ticket.id)
 
     return render(request, 'sales/pos.html', {
@@ -115,6 +125,11 @@ def delete_ticket_item(request, item_id):
 
         item.delete()
         messages.success(request, 'تم حذف المنتج بإذن المدير')
+
+        # 🧹 لو حذف آخر عنصر → احذف Ticket
+        if not ticket.items.exists():
+            ticket.delete()
+            return redirect('cashier_dashboard')
 
     return redirect('sales:pos', ticket_id=ticket.id)
 

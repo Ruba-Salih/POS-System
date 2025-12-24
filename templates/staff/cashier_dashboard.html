@@ -18,7 +18,7 @@
 
     <div class="ticket-list">
 
-        {% for ticket in open_tickets %}
+        {% for ticket in open_ticket %}
             <a href="{% url 'sales:pos' ticket.id %}" class="ticket-item">
                 <span class="ticket-label">
                     🧾 طلب رقم {{ ticket.id }}

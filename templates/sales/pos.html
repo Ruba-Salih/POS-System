@@ -8,6 +8,7 @@
 {% block content %}
 
 <!-- HEADER -->
+{% if ticket %}
 <div class="d-flex justify-content-between align-items-center mb-2">
     <h3>🧾 طلب رقم {{ ticket.id }}</h3>
 
@@ -22,6 +23,8 @@
 <p>👤 الكاشير: {{ ticket.cashier.full_name }}</p>
 
 <hr>
+{% endif %}
+
 
 <!-- PRODUCTS -->
 <h4 class="mb-3">🛒 المنتجات</h4>
@@ -51,6 +54,7 @@
 
 <hr>
 
+{% if ticket %}
 <!-- CURRENT ORDER -->
 <table class="table table-bordered align-middle">
 <thead>
@@ -85,10 +89,11 @@
     <td>
         <form method="POST"
               action="{% url 'sales:delete_ticket_item' item.id %}"
+              class="delete-item-form"
               onsubmit="return askPin(this);">
             {% csrf_token %}
             <input type="hidden" name="manager_pin">
-            <button class="btn btn-danger btn-sm">🗑️</button>
+            <button type="submit" class="btn btn-danger btn-sm">🗑️حذف</button>
         </form>
     </td>
 </tr>
@@ -129,6 +134,7 @@
         ✔ إغلاق الطلب
     </button>
 </form>
+{% endif %}
 
 <!-- ================= JS (UNCHANGED) ================= -->
 <script>
@@ -165,6 +171,7 @@ paymentMethod.addEventListener('change', function () {
 });
 </script>
 
+{% if ticket %}
 <script>
 document.getElementById('payment-form').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -188,6 +195,8 @@ document.getElementById('payment-form').addEventListener('submit', function(e) {
     });
 });
 </script>
+{% endif %}
+
 
 <script>
 function askPin(form) {
