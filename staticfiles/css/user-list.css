@@ -1,0 +1,95 @@
+/* ============================
+   USERS MANAGEMENT PAGE
+============================ */
+
+.users-management {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* ============================
+   HEADER
+============================ */
+
+.users-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.users-header h2 {
+    font-weight: 800;
+    color: var(--green-dark);
+    margin: 0;
+}
+
+/* ============================
+   TABLE WRAPPER
+============================ */
+
+.table-wrapper {
+    background: var(--white);
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    overflow-x: auto;
+}
+
+/* ============================
+   TABLE
+============================ */
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+}
+
+.users-table thead th {
+    background: linear-gradient(135deg, var(--accent-soft), #e6edf6);
+    color: var(--accent-dark);
+    font-weight: 800;
+    padding: 12px;
+    border-bottom: 1px solid var(--border-soft);
+    text-align: right;
+}
+
+.users-table tbody td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-soft);
+    vertical-align: middle;
+}
+
+/* Zebra rows */
+.users-table tbody tr:nth-child(even) td {
+    background: #fafbfc;
+}
+
+/* Hover */
+.users-table tbody tr:hover td {
+    background: #f0fbf6;
+}
+
+/* ============================
+   ACTIONS
+============================ */
+
+.actions-cell {
+    white-space: nowrap;
+}
+
+.inline-form {
+    display: inline-block;
+    margin-inline-start: 6px;
+}
+
+/* ============================
+   EMPTY STATE
+============================ */
+
+.empty-row {
+    text-align: center;
+    color: #6c757d;
+    padding: 20px;
+    font-weight: 600;
+}

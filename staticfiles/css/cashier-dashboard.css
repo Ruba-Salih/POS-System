@@ -1,0 +1,130 @@
+:root {
+    --green-dark: #0a3d26;   /* darker for better contrast */
+    --green-main: #198754;
+    --green-light: #d1e7dd;
+    --white: #ffffff;
+    --gray: #6c757d;
+    --text-dark: #111827;   /* darker than before */
+    --hover-bg: #cfeee0;    /* stronger hover background */
+}
+
+/* ===== Container ===== */
+.cashier-dashboard {
+    max-width: 700px;
+    margin: auto;
+}
+
+/* ===== Titles ===== */
+.dashboard-title {
+    background: linear-gradient(135deg, var(--green-dark), var(--green-main));
+    color: var(--white);
+    padding: 16px;
+    border-radius: 14px;
+    margin-bottom: 24px;
+    font-weight: 800;
+}
+
+.section-title {
+    color: var(--green-dark);
+    margin-bottom: 12px;
+    font-weight: 800;
+}
+
+/* ===== Ticket List ===== */
+.ticket-list {
+    background: var(--white);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+}
+
+/* base */
+.ticket-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    text-decoration: none;
+    color: var(--text-dark) !important; /* ✅ beats bootstrap */
+    border-bottom: 1px solid var(--green-light);
+    transition: background 0.15s ease, color 0.15s ease, filter 0.15s ease;
+}
+
+/* ✅ STRONG HOVER CONTRAST (beats bootstrap hover) */
+.ticket-item:hover,
+.ticket-item:focus {
+    background: var(--hover-bg) !important;
+    color: #000 !important;              /* ✅ maximum readability */
+    filter: contrast(1.05);
+}
+
+.ticket-label {
+    font-weight: 800;
+    color: inherit !important;           /* ✅ always follow parent color */
+}
+
+/* Badge */
+.ticket-badge {
+    background: var(--green-main);
+    color: var(--white) !important;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+/* Make badge darker on hover */
+.ticket-item:hover .ticket-badge,
+.ticket-item:focus .ticket-badge {
+    background: #0b5d3b !important;
+}
+
+/* Empty state */
+.ticket-empty {
+    padding: 16px;
+    text-align: center;
+    color: var(--gray);
+}
+
+/* ===== Actions ===== */
+.action-list {
+    background: var(--white);
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.action-item {
+    display: block;
+    padding: 16px;
+    text-decoration: none;
+    color: var(--text-dark) !important;  /* ✅ beats bootstrap */
+    font-weight: 800;
+    border-bottom: 1px solid var(--green-light);
+    transition: background 0.15s ease, color 0.15s ease, filter 0.15s ease;
+}
+
+.action-item:hover,
+.action-item:focus {
+    background: var(--hover-bg) !important;
+    color: #000 !important;              /* ✅ maximum readability */
+    filter: contrast(1.05);
+}
+
+.action-item:last-child {
+    border-bottom: none;
+}
+
+/* Primary action */
+.action-success {
+    background: linear-gradient(135deg, var(--green-main), #2fbf71) !important;
+    color: var(--white) !important;
+}
+
+.action-success:hover,
+.action-success:focus {
+    background: linear-gradient(135deg, #157347, #25a862) !important;
+    color: var(--white) !important;
+    filter: none;
+}

@@ -1,0 +1,160 @@
+/* ============================
+   EXPENSES PAGE
+============================ */
+
+.expenses-page {
+    max-width: 1100px;
+    margin: auto;
+    padding-bottom: 20px; /* يمنع الالتصاق بأسفل الصفحة */
+}
+
+/* ============================
+   HEADER
+============================ */
+
+.expenses-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap; /* ✅ مهم للشاشات الصغيرة */
+}
+
+.expenses-header h2 {
+    font-weight: 900;
+    color: var(--green-dark);
+}
+
+.expenses-total {
+    background: linear-gradient(135deg, var(--green-dark), var(--green-main));
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+/* ============================
+   FILTER (RESPONSIVE FIX)
+============================ */
+
+.expenses-filter {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+/* inputs stay full width */
+.expenses-filter input {
+    width: 100%;
+}
+
+/* buttons consistent size */
+.expenses-filter .btn {
+    width: 100%;
+    height: 42px;
+    font-weight: 700;
+    border-radius: 10px;
+}
+
+/* ✅ FILTER BUTTON COLOR (match theme, not blue) */
+.expenses-filter .btn-primary {
+    background: linear-gradient(135deg, var(--green-main), #2fbf71);
+    border: none;
+}
+
+.expenses-filter .btn-primary:hover {
+    opacity: 0.95;
+}
+
+/* ============================
+   RESPONSIVE BREAKPOINTS
+============================ */
+
+@media (max-width: 768px) {
+    .expenses-filter {
+        grid-template-columns: 1fr 1fr; /* 2 per row */
+    }
+}
+
+@media (max-width: 480px) {
+    .expenses-filter {
+        grid-template-columns: 1fr; /* stacked */
+    }
+
+    .expenses-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .expenses-total {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* ============================
+   TABLE WRAPPER
+============================ */
+
+.table-wrapper {
+    background: var(--white);
+    border-radius: 14px;
+    border: 1px solid var(--border-soft);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    overflow-x: auto; /* ✅ prevents layout breaking */
+}
+
+/* ============================
+   EXPENSES TABLE
+============================ */
+
+.expenses-table {
+    width: 100%;
+    min-width: 700px; /* ✅ keeps buttons/text clean */
+    border-collapse: collapse;
+}
+
+.expenses-table thead {
+    background: linear-gradient(135deg, var(--accent-soft), #e6edf6);
+}
+
+.expenses-table th {
+    padding: 14px;
+    font-weight: 900;
+    color: var(--accent-dark);
+    border-bottom: 1px solid var(--border-soft);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.expenses-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-soft);
+    text-align: center;
+}
+
+.expenses-table tr:nth-child(even) td {
+    background: #fafbfc;
+}
+
+.expenses-table tr:hover td {
+    background: #f0fbf6;
+}
+
+.expenses-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* ============================
+   EMPTY STATE
+============================ */
+
+.empty-row {
+    padding: 22px;
+    text-align: center;
+    font-weight: 700;
+    color: #6c757d;
+}
