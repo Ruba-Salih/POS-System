@@ -15,8 +15,13 @@
 
     <!-- FILTER -->
     <form method="get" class="sales-filter">
-        <input type="date" name="day" class="form-control">
-        <input type="month" name="month" class="form-control">
+        <input type="text"
+           name="ref"
+           value="{{ request.GET.ref }}"
+           class="form-control"
+           placeholder="ابحث برقم المرجع (REF)">
+        <input type="date" name="day" class="form-control" value="{{ request.GET.day }}">
+        <input type="month" name="month" class="form-control" value="{{ request.GET.month }}">
         <button class="btn btn-green">فلترة</button>
     </form>
 
@@ -25,7 +30,7 @@
         <table class="sales-table">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th>المرجع</th>
                     <th>الكاشير</th>
                     <th>الإجمالي</th>
                     <th>الحالة</th>
@@ -36,7 +41,7 @@
             <tbody>
             {% for ticket in tickets %}
                 <tr>
-                    <td>{{ ticket.id }}</td>
+                    <td>{{ ticket.ref }}</td>
                     <td>{{ ticket.cashier.full_name|default:ticket.cashier.username }}</td>
                     <td>{{ ticket.total_amount }}</td>
                     <td>

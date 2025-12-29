@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from inventory.models import Product
+import uuid
 
 
 class Ticket(models.Model):
@@ -35,13 +36,21 @@ class Ticket(models.Model):
         null=True,
         blank=True
     )
+    ref = models.CharField(max_length=30, unique=True, blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.ref:
+            self.ref = f"{uuid.uuid4().hex[:6].upper()}"
+
+        super().save(*args, **kwargs)
 
     def total_amount(self):
         return sum(item.subtotal() for item in self.items.all())
 
     def __str__(self):
-        return f"طلب #{self.id}"
+        return f"طلب ({self.ref})"
 
 
 class TicketItem(models.Model):

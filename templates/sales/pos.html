@@ -11,7 +11,7 @@
 <!-- HEADER -->
 {% if ticket %}
 <div class="d-flex justify-content-between align-items-center mb-2">
-    <h3>🧾 طلب رقم {{ ticket.id }}</h3>
+    <h3>🧾 REF: {{ ticket.ref }}</h3>
 
     <a href="{% url 'sales:create_ticket' %}"
        target="_blank"
@@ -27,7 +27,11 @@
 {% endif %}
 
 
+<div class="pos-layout">
+
+<div class="pos-products">
 <!-- PRODUCTS -->
+
 <h4 class="mb-3">🛒 المنتجات</h4>
 
 <div class="products-slider">
@@ -53,11 +57,10 @@
 {% endfor %}
 </div>
 
-<hr>
+</div>
 
-
+<div class="pos-order" data-ticket-section class="{% if not ticket %}d-none{% endif %}">
 <!-- CURRENT ORDER -->
-<div data-ticket-section class="{% if not ticket %}d-none{% endif %}">
 <table class="table table-bordered align-middle">
 <thead>
 <tr>
@@ -137,6 +140,10 @@
         ✔ إغلاق الطلب
     </button>
 </form>
+</div>
+
+</div>
+
 </div>
 
 <script>
@@ -309,6 +316,7 @@ document.addEventListener('change', function (e) {
     });
 });
 </script>
+
 
 <script>
 document.addEventListener('click', function (e) {

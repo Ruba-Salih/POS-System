@@ -42,10 +42,11 @@
         <a href="{% url 'sales:create_ticket' %}" class="action-item action-success">
             ➕ إنشاء طلب جديد
         </a>
-
+        {% if user.role == "manager" %}
         <a href="{% url 'change_password' %}" class="action-item">
             🔐 تغيير كلمة المرور
         </a>
+        {% endif %}
 
     </div>
 

@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import user_passes_test
 from django.utils.timezone import now
 from django.contrib import messages
+from pos_system.utils import business_day_range
 
 from sales.models import Ticket, TicketItem
 from pos_system.utils import is_manager
@@ -18,7 +19,8 @@ def dashboard(request):
 
     if day:
         day = datetime.strptime(day, "%Y-%m-%d").date()
-        tickets = tickets.filter(created_at__date=day)
+        start, end = business_day_range(day)
+        tickets = tickets.filter(created_at__gte=start, created_at__lt=end)
 
     elif month:
         month = datetime.strptime(month, "%Y-%m").date()
@@ -28,7 +30,8 @@ def dashboard(request):
         )
 
     else:
-        tickets = tickets.filter(created_at__date=now().date())
+        start, end = business_day_range(now().date())
+        tickets = tickets.filter(created_at__gte=start, created_at__lt=end)
 
     total_sales = sum(ticket.total_amount() for ticket in tickets)
 
@@ -36,14 +39,14 @@ def dashboard(request):
     expenses = Expense.objects.all()
 
     if day:
-        expenses = expenses.filter(created_at__date=day)
+        expenses = expenses.filter(created_at__gte=start, created_at__lt=end)
     elif month:
         expenses = expenses.filter(
             created_at__year=month.year,
             created_at__month=month.month
         )
     else:
-        expenses = expenses.filter(created_at__date=now().date())
+        expenses = expenses.filter(created_at__gte=start, created_at__lt=end)
 
     total_expenses = sum(e.amount for e in expenses)
     # ✅ الربح الصافي
@@ -66,12 +69,17 @@ def sales_list(request):
         items__isnull=False
         ).distinct()
 
+    ref = request.GET.get('ref')
     day = request.GET.get('day')
     month = request.GET.get('month')
 
-    if day:
+    if ref:
+        tickets = tickets.filter(ref__iexact=ref)
+
+    elif day:
         day = datetime.strptime(day, "%Y-%m-%d").date()
-        tickets = tickets.filter(created_at__date=day)
+        start, end = business_day_range(day)
+        tickets = tickets.filter(created_at__gte=start, created_at__lt=end)
 
     elif month:
         month = datetime.strptime(month, "%Y-%m").date()
@@ -80,8 +88,9 @@ def sales_list(request):
             created_at__month=month.month
         )
 
-    else:
-        tickets = tickets.filter(created_at__date=now().date())
+    elif not ref:
+        start, end = business_day_range(now().date())
+        tickets = tickets.filter(created_at__gte=start, created_at__lt=end)
 
     return render(request, 'reports/sales_list.html', {
         'tickets': tickets

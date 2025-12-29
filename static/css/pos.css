@@ -155,3 +155,48 @@
     opacity: 0.6;
     cursor: not-allowed;
 }
+
+/* =========================
+   POS LAYOUT (SIDE BY SIDE)
+========================= */
+
+.pos-layout {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr;   /* products larger */
+    gap: 18px;
+    align-items: start;
+}
+
+/* LEFT: products */
+.pos-products {
+    min-height: 420px;
+}
+
+/* RIGHT: order + payment panel */
+.pos-order {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 10px 24px rgba(0,0,0,.05);
+}
+
+/* Make order table scroll if long */
+.pos-order table {
+    width: 100%;
+}
+
+.pos-order {
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
+}
+
+@media (max-width: 950px) {
+    .pos-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .pos-order {
+        max-height: none;
+    }
+}
