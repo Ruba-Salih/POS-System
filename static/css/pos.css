@@ -181,6 +181,34 @@
     box-shadow: 0 10px 24px rgba(0,0,0,.05);
 }
 
+/* =============== MANAGER PIN DIALOG =============== */
+
+.manager-pin-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55); /* dark overlay */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.manager-pin-box {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 16px 18px;
+    max-width: 320px;
+    width: 90%;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
+}
+
+#manager-pin-input {
+    text-align: center;
+    font-size: 1.2rem;
+    letter-spacing: 0.25em;
+}
+
+
 /* Make order table scroll if long */
 .pos-order table {
     width: 100%;
@@ -189,6 +217,13 @@
 .pos-order {
     max-height: calc(100vh - 220px);
     overflow-y: auto;
+}
+
+.fallback-img {
+    max-height: 75px;
+    max-width: 100%;
+    object-fit: contain;
+    opacity: 0.8;
 }
 
 @media (max-width: 950px) {

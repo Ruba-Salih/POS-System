@@ -189,9 +189,8 @@ def update_ticket_item(request, item_id):
 # =========================
 @login_required
 def print_ticket(request, ticket_id):
-    ticket = get_object_or_404(
-        Ticket,
-        id=ticket_id,
-        cashier=request.user
-    )
-    return render(request, 'sales/receipt.html', {'ticket': ticket})
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    return render(request, 'sales/receipt.html', {
+        'ticket': ticket
+    })

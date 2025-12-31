@@ -46,7 +46,7 @@
                 {% if product.image %}
                     <img src="{{ product.image.url }}" alt="{{ product.name }}">
                 {% else %}
-                    <div class="no-image">📦</div>
+                   <img src="{% static 'img/logo2.jpeg' %}" alt="logo" class="fallback-img">
                 {% endif %}
             </div>
 
@@ -317,8 +317,39 @@ document.addEventListener('change', function (e) {
 });
 </script>
 
+<div id="manager-pin-dialog" class="manager-pin-backdrop d-none">
+    <div class="manager-pin-box">
+        <h5 class="mb-2">🔐 أدخل رمز المدير</h5>
 
+        <input type="password"
+               id="manager-pin-input"
+               class="form-control mb-3"
+               maxlength="6"
+               autocomplete="off"
+               inputmode="numeric">
+
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button"
+                    id="manager-pin-cancel"
+                    class="btn btn-secondary btn-sm">
+                إلغاء
+            </button>
+            <button type="button"
+                    id="manager-pin-confirm"
+                    class="btn btn-primary btn-sm">
+                تأكيد
+            </button>
+        </div>
+    </div>
+</div>
 <script>
+const pinDialog = document.getElementById('manager-pin-dialog');
+const pinInput = document.getElementById('manager-pin-input');
+const pinConfirmBtn = document.getElementById('manager-pin-confirm');
+const pinCancelBtn = document.getElementById('manager-pin-cancel');
+
+let deleteContext = null; // will store form + action when user clicks delete
+
 document.addEventListener('click', function (e) {
     const btn = e.target.closest('.delete-item-form button');
     if (!btn) return;
@@ -326,28 +357,50 @@ document.addEventListener('click', function (e) {
     e.preventDefault();
 
     const form = btn.closest('.delete-item-form');
-    const itemId = form.dataset.itemId;
-    const actionUrl = form.action;
 
-    const pin = prompt('🔐 أدخل رمز المدير:');
-    if (!pin) return;
+    // save context for later
+    deleteContext = {
+        form: form,
+        actionUrl: form.action
+    };
+
+    // show dialog
+    pinInput.value = '';
+    pinDialog.classList.remove('d-none');
+    pinInput.focus();
+});
+
+pinCancelBtn.addEventListener('click', function () {
+    pinDialog.classList.add('d-none');
+    pinInput.value = '';
+    deleteContext = null;
+});
+
+pinConfirmBtn.addEventListener('click', function () {
+    if (!deleteContext) return;
+
+    const pin = pinInput.value.trim();
+    if (!pin) {
+        alert('الرجاء إدخال رمز المدير');
+        return;
+    }
 
     const formData = new FormData();
     formData.append('manager_pin', pin);
     formData.append('csrfmiddlewaretoken', csrfToken);
 
-
-    fetch(actionUrl, {
+    fetch(deleteContext.actionUrl, {
         method: 'POST',
-        headers: { 'X-Requested-With': 'XMLHttpRequest',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
             'X-CSRFToken': csrfToken
         },
         body: formData
     })
-    .then(res =>res.json())// backend redirects
+    .then(res => res.json())
     .then(() => {
         // ✅ remove row
-        const row = form.closest('tr');
+        const row = deleteContext.form.closest('tr');
         row.remove();
 
         // ✅ if no items left
@@ -359,6 +412,11 @@ document.addEventListener('click', function (e) {
                 </tr>
             `;
         }
+
+        // hide dialog + reset
+        pinDialog.classList.add('d-none');
+        pinInput.value = '';
+        deleteContext = null;
     })
     .catch(() => {
         alert('❌ رمز المدير غير صحيح');
@@ -366,14 +424,31 @@ document.addEventListener('click', function (e) {
 });
 </script>
 
-
 <script>
 function printTicket(ticketId) {
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = `/sales/ticket/${ticketId}/print/`;
-    document.body.appendChild(iframe);
-    setTimeout(() => document.body.removeChild(iframe), 3000);
+    const url = `/sales/ticket/${ticketId}/print/`;
+
+    const win = window.open(
+        url,
+        "_blank",
+        "width=400,height=600,toolbar=0,menubar=0,scrollbars=0,resizable=0"
+    );
+
+    if (!win) {
+        alert("Please allow popups to enable printing");
+        return;
+    }
+
+    win.focus();
+
+    win.onload = function () {
+        win.print();
+
+        // auto-close after print
+        setTimeout(() => {
+            win.close();
+        }, 1000);
+    };
 }
 </script>
 
