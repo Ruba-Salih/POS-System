@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-
 <title>Receipt</title>
+
 <style>
 html, body {
     margin: 0;
     padding: 0;
     width: 100%;
+    direction: rtl;                 /* RTL layout */
 }
 
 @page {
@@ -22,67 +23,105 @@ body {
     padding: 4px;
     font-family: monospace;
     font-size: 12px;
-    line-height: 1.1;      /* tighter */
+    line-height: 1.2;
     color: #000;
+    text-align: right;              /* right default */
 }
 
-.wrapper {
-    padding: 6px 8px;
-}
+.wrapper { padding: 6px 8px; }
 
 .center { text-align: center; }
-.line { border-top: 1px dashed #000; margin: 4px 0; }
 
-table { width: 100%; border-collapse: collapse; }
-td { vertical-align: top; }
+.line {
+    border-top: 1px dashed #000;
+    margin: 6px 0;
+}
+
+/* ---- TABLE ---- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;            /* keep columns stable */
+    page-break-inside: avoid;       /* do not split table */
+}
+
+thead, tr {
+    page-break-inside: avoid;       /* no split rows */
+}
+
+th, td {
+    font-size: 12px;
+    padding: 4px 2px;
+    border-right: 1px dashed #000;  /* column lines */
+    word-wrap: break-word;
+}
+
+/* last column needs border on the left instead of right */
+th:last-child,
+td:last-child {
+    border-left: 1px dashed #000;
+    border-right: none;
+}
+
+/* header separator */
+th {
+    font-weight: bold;
+    border-bottom: 1px dashed #000;
+}
 
 .small { font-size: 11px; }
 
-p {
-    margin: 2px 0;         /* REMOVE big gaps between paragraphs */
-}
+p { margin: 2px 0; }
 </style>
-
-
 </head>
+
 <body>
 <div class="wrapper">
 
 <div class="center">
-    <strong>{{ ticket.cashier.full_name }}</strong><br>
-    REF: {{ ticket.ref }}
+    <img src="/static/img/logo.jpeg" alt="Logo" style="max-width: 60px; height: auto;"><br>
+    <strong> كافتيريا ليمون</strong><br>
 </div>
 
 <div class="line"></div>
 
 <table>
-{% for item in ticket.items.all %}
-<tr>
-    <td>{{ item.product.name }} x {{ item.quantity }}</td>
-    <td style="text-align:right">{{ item.subtotal }}</td>
-</tr>
-{% endfor %}
+    <thead>
+        <tr>
+            <th>النوع</th>
+            <th>السعر</th>
+            <th>الكمية</th>
+            <th>الإجمالي</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for item in ticket.items.all %}
+        <tr>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.price }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.subtotal }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
 
 <div class="line"></div>
 
 <p>
     الإجمالي: {{ ticket.total_amount }}<br>
-    الدفع: {{ ticket.payment_method }}
+    طريقة الدفع: {{ ticket.payment_method }}
 </p>
+
+<div class="line"></div>
+
+<p>REF: {{ ticket.ref }}</p>
 
 <div class="center small">
     شكراً لتعاملكم معنا
 </div>
 
-<script>
-window.onload = function () {
-    window.print();
-    setTimeout(() => window.close(), 500);
-};
-</script>
-
 </div>
 </body>
-
 </html>
