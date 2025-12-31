@@ -121,7 +121,12 @@ p { margin: 2px 0; }
 <div class="center small">
     شكراً لتعاملكم معنا
 </div>
-
+<script>
+window.onload = function () {
+    window.print();
+    setTimeout(() => window.close(), 500);
+};
+</script>
 </div>
 </body>
 </html>
